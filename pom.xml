@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.rebue.common-pom</groupId>
+		<artifactId>common-dependencies</artifactId>
+		<version>1.0.5</version>
+	</parent>
+
+	<groupId>com.github.rebue.robotech</groupId>
+	<artifactId>robotech</artifactId>
+	<packaging>pom</packaging>
+	<description>后台服务层的经典封装</description>
+
+	<!-- 待聚合的模块 -->
+	<modules>
+		<module>robotech-api</module>
+		<module>robotech-bll</module>
+	</modules>
+
+</project>
