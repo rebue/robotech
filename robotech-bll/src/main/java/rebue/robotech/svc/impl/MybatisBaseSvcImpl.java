@@ -88,6 +88,19 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
     }
 
     @Override
+    public MO getOne(MO mo) {
+        _log.info("getOne: {}", mo);
+        List<MO> list = _mapper.selectSelective(mo);
+        if (list.size() <= 0) {
+            return null;
+        } else if (list.size() > 1) {
+            throw new RuntimeException("query row count>1");
+        } else {
+            return list.get(0);
+        }
+    }
+
+    @Override
     public PageInfo<MO> list(MO qo, int pageNum, int pageSize) {
         _log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));

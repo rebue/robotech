@@ -26,4 +26,6 @@ public interface MybatisBaseSvc<MO, ID> {
 
     boolean existSelective(MO mo);
 
+    MO getOne(MO mo);
+
 }
