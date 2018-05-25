@@ -28,4 +28,6 @@ public interface MybatisBaseSvc<MO, ID> {
 
     MO getOne(MO mo);
 
+	PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy);
+
 }

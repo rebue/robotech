@@ -105,6 +105,12 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
         _log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
+    
+    @Override
+    public PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy) {
+    	_log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
+    	return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+    }
 
     @Override
     public MO getById(ID id) {
