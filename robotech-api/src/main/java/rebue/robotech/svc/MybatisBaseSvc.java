@@ -20,6 +20,8 @@ public interface MybatisBaseSvc<MO, ID> {
 
     PageInfo<MO> list(MO qo, int pageNum, int pageSize);
 
+    PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy);
+
     MO getById(ID id);
 
     boolean existByPrimaryKey(ID id);
@@ -27,7 +29,5 @@ public interface MybatisBaseSvc<MO, ID> {
     boolean existSelective(MO mo);
 
     MO getOne(MO mo);
-
-	PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy);
 
 }
