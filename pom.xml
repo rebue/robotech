@@ -18,4 +18,19 @@
 		<module>robotech-bll</module>
 	</modules>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.github.rebue.robotech</groupId>
+				<artifactId>robotech-api</artifactId>
+				<version>1.0.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.github.rebue.wheel</groupId>
+				<artifactId>wheel-core</artifactId>
+				<version>1.0.8</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
