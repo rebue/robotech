@@ -19,7 +19,11 @@ public enum ResultDic implements EnumBase {
     /**
      * -1: 失败
      */
-    FAIL(-1);
+    FAIL(-1),
+    /**
+     * -2: 警告(不用回滚事务)
+     */
+    WARN(-2);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的

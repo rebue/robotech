@@ -16,20 +16,18 @@ import rebue.robotech.dic.ResultDic;
  */
 @JsonInclude(Include.NON_NULL)
 @ToString
+@Getter
+@Setter
 public class Ro {
 
     /**
      * 返回值 1:成功 -1:失败
      */
-    @Getter
-    @Setter
     private ResultDic result;
 
     /**
      * 返回的结果
      */
-    @Getter
-    @Setter
     private String    msg;
 
 }
