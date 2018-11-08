@@ -8,8 +8,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import rebue.wheel.baseintf.EnumBase;
 
 /**
- * 1 成功
- * -1 失败
+ * 1: 成功
+ * 0: 参数错误
+ * -1: 失败(回滚事务)
+ * -2: 警告(不用回滚事务)
  */
 public enum ResultDic implements EnumBase {
     /**
@@ -17,7 +19,11 @@ public enum ResultDic implements EnumBase {
      */
     SUCCESS(1),
     /**
-     * -1: 失败
+     * 0: 参数错误
+     */
+    PARAM_ERROR(0),
+    /**
+     * -1: 失败(回滚事务)
      */
     FAIL(-1),
     /**
@@ -32,7 +38,7 @@ public enum ResultDic implements EnumBase {
     // 初始化map，保存枚举的所有项到map中以方便通过code查找
     static {
         valueMap = new HashMap<>();
-        for (EnumBase item : values()) {
+        for (final EnumBase item : values()) {
             valueMap.put(item.getCode(), item);
         }
     }
@@ -43,8 +49,8 @@ public enum ResultDic implements EnumBase {
      * 否则jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator
-    public static ResultDic getItem(int code) {
-        EnumBase result = valueMap.get(code);
+    public static ResultDic getItem(final int code) {
+        final EnumBase result = valueMap.get(code);
         if (result == null) {
             throw new IllegalArgumentException("输入的code" + code + "不在枚举的取值范围内");
         }
@@ -56,7 +62,7 @@ public enum ResultDic implements EnumBase {
     /**
      * 构造器，传入code
      */
-    ResultDic(int code) {
+    ResultDic(final int code) {
         this.code = code;
     }
 

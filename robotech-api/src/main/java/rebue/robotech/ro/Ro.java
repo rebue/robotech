@@ -21,7 +21,11 @@ import rebue.robotech.dic.ResultDic;
 public class Ro {
 
     /**
-     * 返回值 1:成功 -1:失败
+     * 返回值类型
+     * 1: 成功
+     * 0: 参数错误
+     * -1: 失败(回滚事务)
+     * -2: 警告(不用回滚事务)
      */
     private ResultDic result;
 
