@@ -17,6 +17,6 @@ import lombok.ToString;
 @Setter
 public class IdRo extends Ro {
 
-    private Long Id;
+    private String Id;
 
 }
