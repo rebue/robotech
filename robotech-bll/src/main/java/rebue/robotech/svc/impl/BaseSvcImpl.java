@@ -17,7 +17,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import rebue.robotech.mapper.MybatisBaseMapper;
-import rebue.robotech.svc.MybatisBaseSvc;
+import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
 
 @Service
@@ -33,7 +33,7 @@ import rebue.wheel.idworker.IdWorker3;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements MybatisBaseSvc<MO, ID> {
+public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
     private final static Logger _log = LoggerFactory.getLogger(BaseSvcImpl.class);
 
