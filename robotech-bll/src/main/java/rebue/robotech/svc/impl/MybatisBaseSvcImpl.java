@@ -56,22 +56,22 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(MO mo) {
-        _log.info("add: {}", mo);
+    public int add(final MO mo) {
+        _log.info("add: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modify(MO mo) {
-        _log.info("modify: {}", mo);
+    public int modify(final MO mo) {
+        _log.info("modify: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int del(ID id) {
-        _log.info("del: {}", id);
+    public int del(final ID id) {
+        _log.info("del: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
@@ -82,15 +82,15 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
     }
 
     @Override
-    public List<MO> list(MO mo) {
-        _log.info("list: {}", mo);
+    public List<MO> list(final MO mo) {
+        _log.info("list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
-    public MO getOne(MO mo) {
-        _log.info("getOne: {}", mo);
-        List<MO> list = _mapper.selectSelective(mo);
+    public MO getOne(final MO mo) {
+        _log.info("getOne: mo-{}", mo);
+        final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
         } else if (list.size() > 1) {
@@ -101,32 +101,32 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
     }
 
     @Override
-    public PageInfo<MO> list(MO qo, int pageNum, int pageSize) {
+    public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize) {
         _log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
-    
+
     @Override
-    public PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy) {
-    	_log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
-    	return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+    public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize, final String orderBy) {
+        _log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
+        return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
-    public MO getById(ID id) {
-        _log.info("getById: {}", id);
+    public MO getById(final ID id) {
+        _log.info("getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
-    public boolean existByPrimaryKey(ID id) {
-        _log.info("existByPrimaryKey: {}", id);
+    public boolean existByPrimaryKey(final ID id) {
+        _log.info("existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
-    public boolean existSelective(MO mo) {
-        _log.info("existSelective: {}", mo);
+    public boolean existSelective(final MO mo) {
+        _log.info("existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 

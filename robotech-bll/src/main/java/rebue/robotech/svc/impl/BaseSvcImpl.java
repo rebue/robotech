@@ -61,21 +61,21 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(final MO mo) {
-        _log.info("add: {}", mo);
+        _log.info("add: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int modify(final MO mo) {
-        _log.info("modify: {}", mo);
+        _log.info("modify: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int del(final ID id) {
-        _log.info("del: {}", id);
+        _log.info("del: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
@@ -87,13 +87,13 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
 
     @Override
     public List<MO> list(final MO mo) {
-        _log.info("list: {}", mo);
+        _log.info("list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
     public MO getOne(final MO mo) {
-        _log.info("getOne: {}", mo);
+        _log.info("getOne: mo-{}", mo);
         final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
@@ -118,19 +118,19 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
 
     @Override
     public MO getById(final ID id) {
-        _log.info("getById: {}", id);
+        _log.info("getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
     public boolean existByPrimaryKey(final ID id) {
-        _log.info("existByPrimaryKey: {}", id);
+        _log.info("existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public boolean existSelective(final MO mo) {
-        _log.info("existSelective: {}", mo);
+        _log.info("existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 

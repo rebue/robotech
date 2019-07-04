@@ -4,12 +4,11 @@
 	<parent>
 		<groupId>com.github.rebue.common-pom</groupId>
 		<artifactId>common-dependencies</artifactId>
-		<version>1.0.8</version>
+		<version>1.0.9</version>
 	</parent>
 
 	<groupId>com.github.rebue.robotech</groupId>
 	<artifactId>robotech</artifactId>
-	<version>1.0.9</version>
 	<packaging>pom</packaging>
 	<description>后台服务层的经典封装</description>
 
