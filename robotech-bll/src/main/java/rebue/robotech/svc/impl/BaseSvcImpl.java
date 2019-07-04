@@ -61,39 +61,39 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(final MO mo) {
-        _log.info("add: mo-{}", mo);
+        _log.info("svc.add: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int modify(final MO mo) {
-        _log.info("modify: mo-{}", mo);
+        _log.info("svc.modify: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int del(final ID id) {
-        _log.info("del: id-{}", id);
+        _log.info("svc.del: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
     @Override
     public List<MO> listAll() {
-        _log.info("listAll");
+        _log.info("svc.listAll");
         return _mapper.selectAll();
     }
 
     @Override
     public List<MO> list(final MO mo) {
-        _log.info("list: mo-{}", mo);
+        _log.info("svc.list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
     public MO getOne(final MO mo) {
-        _log.info("getOne: mo-{}", mo);
+        _log.info("svc.getOne: mo-{}", mo);
         final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
@@ -106,31 +106,31 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize) {
-        _log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
+        _log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize, final String orderBy) {
-        _log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
+        _log.info("svc.list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
         return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public MO getById(final ID id) {
-        _log.info("getById: id-{}", id);
+        _log.info("svc.getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
     public boolean existByPrimaryKey(final ID id) {
-        _log.info("existByPrimaryKey: id-{}", id);
+        _log.info("svc.existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public boolean existSelective(final MO mo) {
-        _log.info("existSelective: mo-{}", mo);
+        _log.info("svc.existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 
