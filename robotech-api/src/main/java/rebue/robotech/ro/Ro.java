@@ -3,21 +3,20 @@ package rebue.robotech.ro;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import rebue.robotech.dic.ResultDic;
 
 /**
  * 基本的返回值的对象类
  * 
  * @author zbz
- *
  */
 @JsonInclude(Include.NON_NULL)
-@ToString
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ro {
 
     /**
