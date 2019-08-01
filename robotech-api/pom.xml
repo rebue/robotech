@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.github.rebue.robotech</groupId>
 		<artifactId>robotech</artifactId>
-		<version>1.0.9</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<artifactId>robotech-api</artifactId>
@@ -20,8 +20,6 @@
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 		</dependency>
-
-
 
 		<!-- MyBatis的分页插件 -->
 		<dependency>
