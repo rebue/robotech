@@ -51,7 +51,7 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
         log.info("modify: so-{}", so);
         try {
             @SuppressWarnings("unchecked")
-            final UpdateRequest req = new UpdateRequest(getIndexName(), so.getId()).doc((Map<String, ?>) PojoUtils.pojoToMap(so));
+            final UpdateRequest req = new UpdateRequest(getIndexName(), so.getId()).doc((Map<String, Object>) PojoUtils.pojoToMap(so));
             final UpdateResponse resp = esClient.update(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch修改document成功: index-{} id-{}", resp.getIndex(), resp.getId());
         } catch (final IOException e) {
