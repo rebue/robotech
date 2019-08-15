@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.mapper.MybatisBaseMapper;
 import rebue.robotech.svc.MybatisBaseSvc;
 import rebue.wheel.idworker.IdWorker3;
@@ -31,18 +30,17 @@ import rebue.wheel.idworker.IdWorker3;
  * 而涉及到增删改的数据库操作的方法，要设置 readOnly=false, propagation=Propagation.REQUIRED
  * </pre>
  */
+@Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>> implements MybatisBaseSvc<MO, ID> {
 
-    private final static Logger _log = LoggerFactory.getLogger(MybatisBaseSvcImpl.class);
-
     @Autowired
-    protected MAPPER            _mapper;
+    protected MAPPER    _mapper;
 
     @Value("${appid:0}")
-    private int                 _appid;
+    private int         _appid;
 
-    protected IdWorker3         _idWorker;
+    protected IdWorker3 _idWorker;
 
     @PostConstruct
     public void init() {
@@ -57,39 +55,39 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(final MO mo) {
-        _log.info("add: mo-{}", mo);
+        log.info("add: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int modify(final MO mo) {
-        _log.info("modify: mo-{}", mo);
+        log.info("modify: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int del(final ID id) {
-        _log.info("del: id-{}", id);
+        log.info("del: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
     @Override
     public List<MO> listAll() {
-        _log.info("listAll");
+        log.info("listAll");
         return _mapper.selectAll();
     }
 
     @Override
     public List<MO> list(final MO mo) {
-        _log.info("list: mo-{}", mo);
+        log.info("list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
     public MO getOne(final MO mo) {
-        _log.info("getOne: mo-{}", mo);
+        log.info("getOne: mo-{}", mo);
         final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
@@ -102,31 +100,31 @@ public class MybatisBaseSvcImpl<MO, ID, MAPPER extends MybatisBaseMapper<MO, ID>
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize) {
-        _log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
+        log.info("list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize, final String orderBy) {
-        _log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
+        log.info("list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
         return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public MO getById(final ID id) {
-        _log.info("getById: id-{}", id);
+        log.info("getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
     public boolean existByPrimaryKey(final ID id) {
-        _log.info("existByPrimaryKey: id-{}", id);
+        log.info("existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public boolean existSelective(final MO mo) {
-        _log.info("existSelective: mo-{}", mo);
+        log.info("existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 

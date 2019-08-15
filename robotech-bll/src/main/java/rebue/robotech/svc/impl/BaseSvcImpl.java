@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.mapper.MybatisBaseMapper;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
@@ -33,20 +32,19 @@ import rebue.wheel.idworker.IdWorker3;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+@Slf4j
 public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
-    private final static Logger _log = LoggerFactory.getLogger(BaseSvcImpl.class);
+    @Autowired
+    protected MAPPER    _mapper;
 
     @Autowired
-    protected MAPPER            _mapper;
-
-    @Autowired
-    protected DAO               _dao;
+    protected DAO       _dao;
 
     @Value("${appid:0}")
-    private int                 _appid;
+    private int         _appid;
 
-    protected IdWorker3         _idWorker;
+    protected IdWorker3 _idWorker;
 
     @PostConstruct
     public void init() {
@@ -61,39 +59,39 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(final MO mo) {
-        _log.info("svc.add: mo-{}", mo);
+        log.info("svc.add: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int modify(final MO mo) {
-        _log.info("svc.modify: mo-{}", mo);
+        log.info("svc.modify: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int del(final ID id) {
-        _log.info("svc.del: id-{}", id);
+        log.info("svc.del: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
     @Override
     public List<MO> listAll() {
-        _log.info("svc.listAll");
+        log.info("svc.listAll");
         return _mapper.selectAll();
     }
 
     @Override
     public List<MO> list(final MO mo) {
-        _log.info("svc.list: mo-{}", mo);
+        log.info("svc.list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
     public MO getOne(final MO mo) {
-        _log.info("svc.getOne: mo-{}", mo);
+        log.info("svc.getOne: mo-{}", mo);
         final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
@@ -106,31 +104,31 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize) {
-        _log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
+        log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize, final String orderBy) {
-        _log.info("svc.list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
+        log.info("svc.list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
         return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
     }
 
     @Override
     public MO getById(final ID id) {
-        _log.info("svc.getById: id-{}", id);
+        log.info("svc.getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
     public boolean existByPrimaryKey(final ID id) {
-        _log.info("svc.existByPrimaryKey: id-{}", id);
+        log.info("svc.existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public boolean existSelective(final MO mo) {
-        _log.info("svc.existSelective: mo-{}", mo);
+        log.info("svc.existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 
