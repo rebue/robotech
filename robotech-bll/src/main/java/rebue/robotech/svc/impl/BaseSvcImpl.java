@@ -121,6 +121,12 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     }
 
     @Override
+    public JO getJoById(final ID id) {
+        log.info("svc.getJoById: id-{}", id);
+        return _dao.getOne(id);
+    }
+
+    @Override
     public boolean existByPrimaryKey(final ID id) {
         log.info("svc.existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);

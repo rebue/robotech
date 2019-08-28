@@ -24,6 +24,8 @@ public interface BaseSvc<ID, MO, JO> {
 
     MO getById(ID id);
 
+    JO getJoById(ID id);
+
     boolean existByPrimaryKey(ID id);
 
     boolean existSelective(MO mo);
