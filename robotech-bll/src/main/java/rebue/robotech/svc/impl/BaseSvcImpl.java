@@ -123,7 +123,12 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     @Override
     public JO getJoById(final ID id) {
         log.info("svc.getJoById: id-{}", id);
-        return _dao.getOne(id);
+//        final Optional<JO> optional = _dao.findById(id);
+//        if (!optional.isPresent()) {
+//            return null;
+//        }
+//        return optional.get();
+        return _dao.findById(id).orElse(null);
     }
 
     @Override
