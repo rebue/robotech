@@ -16,6 +16,8 @@ public interface BaseSvc<ID, MO, JO> {
 
     List<MO> listAll();
 
+    List<JO> listJoAll();
+
     List<MO> list(MO mo);
 
     PageInfo<MO> list(MO qo, int pageNum, int pageSize);

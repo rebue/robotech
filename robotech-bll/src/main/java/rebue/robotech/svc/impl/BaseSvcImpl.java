@@ -84,6 +84,12 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     }
 
     @Override
+    public List<JO> listJoAll() {
+        log.info("svc.listAll");
+        return _dao.findAll();
+    }
+
+    @Override
     public List<MO> list(final MO mo) {
         log.info("svc.list: mo-{}", mo);
         return _mapper.selectSelective(mo);
