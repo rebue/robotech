@@ -7,7 +7,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,31 +18,36 @@ import rebue.robotech.mapper.MybatisBaseMapper;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
 
-@Service
 /**
+ * 服务实现层的父类
+ * 
  * <pre>
- * 在单独使用不带任何参数 的 @Transactional 注释时，
- * propagation(传播模式)=REQUIRED，readOnly=false，
- * isolation(事务隔离级别)=READ_COMMITTED，
- * 而且事务不会针对受控异常（checked exception）回滚。
+ * 封装了一些常用的增删改查的方法，并同时提供了MyBatis和JPA两种操作数据库的方式
+ * 鱼和熊掌可以兼得矣，但是在有了MyBatis之后，JPA很鸡肋，JPA大概会有种“既生瑜何生亮”的感觉
+ * 
  * 注意：
- * 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
- * 而涉及到增删改的数据库操作的方法，要设置 readOnly=false, propagation=Propagation.REQUIRED
+ * 1. 查询数据库操作的方法，不用设置默认 @Transactional
+ *    在类上方已经设置默认为 readOnly=true, propagation=Propagation.SUPPORTS
+ *    而涉及到 增删改 数据库操作的方法时，要设置 readOnly=false, propagation=Propagation.REQUIRED
+ * 2. 事务不会针对受控异常（checked exception）回滚
+ *    要想回滚事务，须抛出运行时异常(RuntimeException)
+ * 3. 如果类上方不带任何参数的 @Transactional 注解时，如同下面的设置
+ *    propagation(传播模式)=REQUIRED，readOnly=false，isolation(事务隔离级别)=READ_COMMITTED
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
-public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>>
+        implements BaseSvc<ID, MO, JO> {
 
     @Autowired
-    protected MAPPER    _mapper;
+    protected MAPPER _mapper;
 
     @Autowired
-    protected DAO       _dao;
+    protected DAO _dao;
 
-    @Value("${appid:0}")
+    @Value("${robotech.appid:0}")
     private int         _appid;
-
     protected IdWorker3 _idWorker;
 
     @PostConstruct
@@ -52,28 +56,23 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     }
 
     @Override
-    public void test() {
-
-    }
-
-    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(final MO mo) {
-        log.info("svc.add: mo-{}", mo);
+    public int insertSelective(final MO mo) {
+        log.info("svc.insertSelective: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modify(final MO mo) {
-        log.info("svc.modify: mo-{}", mo);
+    public int updateByPrimaryKeySelective(final MO mo) {
+        log.info("svc.updateByPrimaryKeySelective: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int del(final ID id) {
-        log.info("svc.del: id-{}", id);
+    public int deleteByPrimaryKey(final ID id) {
+        log.info("svc.deleteByPrimaryKey: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
@@ -129,11 +128,6 @@ public class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER e
     @Override
     public JO getJoById(final ID id) {
         log.info("svc.getJoById: id-{}", id);
-//        final Optional<JO> optional = _dao.findById(id);
-//        if (!optional.isPresent()) {
-//            return null;
-//        }
-//        return optional.get();
         return _dao.findById(id).orElse(null);
     }
 

@@ -23,8 +23,8 @@ import rebue.robotech.svc.EsBaseSvc;
 import rebue.wheel.GenericTypeUtils;
 import rebue.wheel.PojoUtils;
 
-@Service
 @Slf4j
+@Service
 public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
 
     @Resource
@@ -35,7 +35,8 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
         log.info("add: so-{}", so);
         try {
             @SuppressWarnings("unchecked")
-            final IndexRequest req = new IndexRequest(getIndexName()).id(so.getId()).source((Map<String, ?>) PojoUtils.pojoToMap(so));
+            final IndexRequest  req  = new IndexRequest(getIndexName()).id(so.getId())
+                    .source((Map<String, ?>) PojoUtils.pojoToMap(so));
             final IndexResponse resp = esClient.index(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch添加document成功: index-{} id-{}", resp.getIndex(), resp.getId());
             return so;
@@ -51,7 +52,8 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
         log.info("modify: so-{}", so);
         try {
             @SuppressWarnings("unchecked")
-            final UpdateRequest req = new UpdateRequest(getIndexName(), so.getId()).doc((Map<String, Object>) PojoUtils.pojoToMap(so));
+            final UpdateRequest  req  = new UpdateRequest(getIndexName(), so.getId())
+                    .doc((Map<String, Object>) PojoUtils.pojoToMap(so));
             final UpdateResponse resp = esClient.update(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch修改document成功: index-{} id-{}", resp.getIndex(), resp.getId());
         } catch (final IOException e) {
@@ -65,7 +67,7 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
     public void del(final String id) {
         log.info("del: id-{}", id);
         try {
-            final DeleteRequest req = new DeleteRequest(getIndexName(), id);
+            final DeleteRequest  req  = new DeleteRequest(getIndexName(), id);
             final DeleteResponse resp = esClient.delete(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch删除document成功: index-{} id-{}", resp.getIndex(), resp.getId());
         } catch (final IOException e) {
@@ -80,7 +82,7 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
     public SO getById(final String id) {
         log.info("getById: id-{}", id);
         try {
-            final GetRequest req = new GetRequest(getIndexName(), id);
+            final GetRequest  req  = new GetRequest(getIndexName(), id);
             final GetResponse resp = esClient.get(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch通过id获取document成功: index-{} id-{}", resp.getIndex(), resp.getId());
             return (SO) PojoUtils.mapToPojo(resp.getSource(), GenericTypeUtils.getClassOfGeneric(this));

@@ -4,15 +4,32 @@ import java.util.List;
 
 import com.github.pagehelper.PageInfo;
 
+import rebue.robotech.ro.Ro;
+
 public interface BaseSvc<ID, MO, JO> {
+    /**
+     * 添加
+     */
+    Ro add(MO mo);
+
+    /**
+     * 修改
+     */
+    Ro modify(MO mo);
+
+    /**
+     * 删除
+     */
+    Ro del(ID id);
+
     // TODO : Svc : 在Spring的Bean加载完以后要调用此方法，否则在RabbitMQ里的回调线程调实现类的方法会没有任何反应
-    void test();
+//    void test();
 
-    int add(MO mo);
+    int insertSelective(MO mo);
 
-    int modify(MO mo);
+    int updateByPrimaryKeySelective(MO mo);
 
-    int del(ID id);
+    int deleteByPrimaryKey(ID id);
 
     List<MO> listAll();
 
@@ -33,5 +50,4 @@ public interface BaseSvc<ID, MO, JO> {
     boolean existSelective(MO mo);
 
     MO getOne(MO mo);
-
 }

@@ -5,7 +5,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import rebue.wheel.baseintf.EnumBase;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 任务执行状态的字典
@@ -15,68 +16,65 @@ import rebue.wheel.baseintf.EnumBase;
  * 1: 已执行
  * 2: 暂停
  */
+@AllArgsConstructor
+@Getter
 public enum TaskExecuteStateDic implements EnumBase {
     /**
      * -1: 取消
      */
-    CANCEL(-1),
+    CANCEL(-1, "取消"),
     /**
      * 0: 未执行
      */
-    NONE(0),
+    NONE(0, "未执行"),
     /**
      * 1: 已执行
      */
-    DONE(1),
+    DONE(1, "已执行"),
     /**
      * 2: 暂停
      */
-    SUSPEND(2);
+    SUSPEND(2, "暂停");
+
+    private final int    code;
+    private final String desc;
+
+    @Override
+    public String getName() {
+        return name();
+    }
+
+    /**
+     * springdoc显示枚举说明将会调用此方法
+     */
+    @Override
+    public String toString() {
+        return getCode() + "(" + getDesc() + ")";
+    }
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的
      */
-    private static Map<Integer, EnumBase> valueMap;
+    private static final Map<Integer, EnumBase> valueMap = new HashMap<>();
     // 初始化map，保存枚举的所有项到map中以方便通过code查找
     static {
-        valueMap = new HashMap<>();
         for (final EnumBase item : values()) {
             valueMap.put(item.getCode(), item);
         }
     }
 
     /**
-     * jackson反序列化时，通过code得到枚举的实例 注意：此方法必须是static的方法，且返回类型必须是本枚举类，而不能是接口EnumBase 否则jackson将调用默认的反序列化方法，而不会调用本方法
+     * 通过code得到枚举的实例(Jackson反序列化时会调用此方法)
+     * 注意：此方法必须是static的方法，且返回类型必须是本枚举类，而不能是接口EnumBase
+     * 否则Jackson将调用默认的反序列化方法，而不会调用本方法
      */
-    @JsonCreator
+    @JsonCreator // Jackson在反序列化时，调用 @JsonCreator 标注的构造器或者工厂方法来创建对象
     public static TaskExecuteStateDic getItem(final int code) {
-        final EnumBase result = valueMap.get(code);
+        final TaskExecuteStateDic result = (TaskExecuteStateDic) valueMap.get(code);
         if (result == null) {
             throw new IllegalArgumentException("输入的code" + code + "不在枚举的取值范围内");
         }
-        return (TaskExecuteStateDic) result;
-    }
-
-    private int code;
-
-    /**
-     * 构造器，传入code
-     */
-    TaskExecuteStateDic(final int code) {
-        this.code = code;
-    }
-
-    /**
-     * @return jackson序列化时，输出枚举实例的code
-     */
-    @Override
-    public int getCode() {
-        return code;
-    }
-
-    @Override
-    public String getName() {
-        return name();
+        return result;
     }
 
 }
