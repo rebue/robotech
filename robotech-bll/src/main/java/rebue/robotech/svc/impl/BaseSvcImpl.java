@@ -37,14 +37,13 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>>
-        implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
     @Autowired
-    protected MAPPER _mapper;
+    protected MAPPER    _mapper;
 
     @Autowired
-    protected DAO _dao;
+    protected DAO       _dao;
 
     @Value("${robotech.appid:0}")
     private int         _appid;
@@ -108,18 +107,6 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize) {
-        log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
-        return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
-    }
-
-    @Override
-    public PageInfo<MO> list(final MO qo, final int pageNum, final int pageSize, final String orderBy) {
-        log.info("svc.list: qo-{}; pageNum-{}; orderBy-{}; pageSize-{}", qo, pageNum, pageSize, orderBy);
-        return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
-    }
-
-    @Override
     public MO getById(final ID id) {
         log.info("svc.getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
@@ -141,6 +128,53 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     public boolean existSelective(final MO mo) {
         log.info("svc.existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
+    }
+
+    @Override
+    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize) {
+        return list(qo, pageNum, pageSize, null, null);
+    }
+
+    @Override
+    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final Integer limitPageSize) {
+        return list(qo, pageNum, pageSize, null, limitPageSize);
+    }
+
+    @Override
+    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy) {
+        return list(qo, pageNum, pageSize, null, null);
+    }
+
+    @Override
+    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
+        log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}; orderBy-{};", qo, pageNum, pageSize, orderBy);
+
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+        if (pageSize == null) {
+            pageSize = 5;
+        }
+
+        if (limitPageSize == null) {
+            limitPageSize = 50;
+        }
+        if (pageSize > limitPageSize) {
+            final String msg = "pageSize不能大于" + limitPageSize;
+            log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        PageInfo<MO> result;
+        if (orderBy == null) {
+            result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+        } else {
+            result = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+        }
+
+        log.debug("result: " + result);
+
+        return result;
     }
 
 }

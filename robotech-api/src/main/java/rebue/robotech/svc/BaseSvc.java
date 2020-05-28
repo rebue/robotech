@@ -37,10 +37,6 @@ public interface BaseSvc<ID, MO, JO> {
 
     List<MO> list(MO mo);
 
-    PageInfo<MO> list(MO qo, int pageNum, int pageSize);
-
-    PageInfo<MO> list(MO qo, int pageNum, int pageSize, String orderBy);
-
     MO getById(ID id);
 
     JO getJoById(ID id);
@@ -50,4 +46,13 @@ public interface BaseSvc<ID, MO, JO> {
     boolean existSelective(MO mo);
 
     MO getOne(MO mo);
+
+    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize);
+
+    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
+
+    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
+
+    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+
 }
