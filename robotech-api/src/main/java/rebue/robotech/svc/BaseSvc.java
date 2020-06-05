@@ -8,7 +8,12 @@ import rebue.robotech.ro.Ro;
 
 public interface BaseSvc<ID, MO, JO> {
     /**
-     * 添加
+     * 添加(不会自动生成ID，所以ID不能为空)
+     */
+    Ro add0(MO mo);
+
+    /**
+     * 添加(如果ID为空，自动生成ID)
      */
     Ro add(MO mo);
 

@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import lombok.extern.slf4j.Slf4j;
+import rebue.robotech.dic.ResultDic;
 import rebue.robotech.mapper.MybatisBaseMapper;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
 
@@ -52,6 +55,82 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @PostConstruct
     public void init() {
         _idWorker = new IdWorker3(_appid);
+    }
+
+    /**
+     * 添加
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro add0(final MO mo) {
+        log.info("svc.add: mo-", mo);
+        try {
+            final int result = _mapper.insertSelective(mo);
+            if (result == 1) {
+                final String msg = "添加成功";
+                log.info("{}: mo-{}", msg, mo);
+                return new Ro(ResultDic.SUCCESS, msg);
+            } else {
+                final String msg = "添加失败";
+                log.error("{}: mo-{}", msg, mo);
+                return new Ro(ResultDic.FAIL, msg);
+            }
+        } catch (final DuplicateKeyException e) {
+            final String msg = "添加失败，唯一键重复：" + e.getCause().getMessage();
+            log.error(msg + ": mo-" + mo, e);
+            return new Ro(ResultDic.FAIL, msg);
+        } catch (final RuntimeException e) {
+            final String msg = "添加失败，出现运行时异常";
+            log.error(msg + ": mo-" + mo, e);
+            return new Ro(ResultDic.FAIL, msg);
+        }
+    }
+
+    /**
+     * 修改
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro modify(final MO mo) {
+        log.info("svc.modify: mo-{}", mo);
+        try {
+            if (_mapper.updateByPrimaryKeySelective(mo) == 1) {
+                final String msg = "修改成功";
+                log.info("{}: mo-{}", msg, mo);
+                return new Ro(ResultDic.SUCCESS, msg);
+            } else {
+                final String msg = "修改失败";
+                log.error("{}: mo-{}", msg, mo);
+                return new Ro(ResultDic.FAIL, msg);
+            }
+        } catch (final DuplicateKeyException e) {
+            final String msg = "修改失败，唯一键重复：" + e.getCause().getMessage();
+            log.error(msg + ": mo=" + mo, e);
+            return new Ro(ResultDic.FAIL, msg);
+        } catch (final RuntimeException e) {
+            final String msg = "修改失败，出现运行时异常";
+            log.error(msg + ": mo-" + mo, e);
+            return new Ro(ResultDic.FAIL, msg);
+        }
+    }
+
+    /**
+     * 删除
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro del(final ID id) {
+        log.info("svc.del: id-{}", id);
+        final int result = _mapper.deleteByPrimaryKey(id);
+        if (result == 1) {
+            final String msg = "删除成功";
+            log.info("{}: id-{}", msg, id);
+            return new Ro(ResultDic.SUCCESS, msg);
+        } else {
+            final String msg = "删除失败，找不到该记录";
+            log.error("{}: id-{}", msg, id);
+            return new Ro(ResultDic.FAIL, msg);
+        }
     }
 
     @Override
@@ -147,7 +226,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
 
     @Override
     public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
-        log.info("svc.list: qo-{}; pageNum-{}; pageSize-{}; orderBy-{};", qo, pageNum, pageSize, orderBy);
+        log.info("svc.list: qo-{}, pageNum-{}, pageSize-{}, orderBy-{}", qo, pageNum, pageSize, orderBy);
 
         if (pageNum == null) {
             pageNum = 1;
