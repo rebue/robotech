@@ -17,6 +17,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.mapper.MybatisBaseMapper;
+import rebue.robotech.ro.PageRo;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
@@ -40,14 +41,13 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>>
-        implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
     @Autowired
-    protected MAPPER _mapper;
+    protected MAPPER    _mapper;
 
     @Autowired
-    protected DAO _dao;
+    protected DAO       _dao;
 
     @Value("${robotech.appid:0}")
     private int         _appid;
@@ -189,23 +189,22 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize) {
+    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize) {
         return list(qo, pageNum, pageSize, null, null);
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final Integer limitPageSize) {
+    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final Integer limitPageSize) {
         return list(qo, pageNum, pageSize, null, limitPageSize);
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy) {
+    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy) {
         return list(qo, pageNum, pageSize, null, null);
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy,
-            Integer limitPageSize) {
+    public PageRo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -222,15 +221,14 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
             throw new IllegalArgumentException(msg);
         }
 
-        PageInfo<MO> result;
+        PageInfo<MO> pageInfo;
         if (orderBy == null) {
-            result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
         } else {
-            result = PageHelper.startPage(pageNum, pageSize, orderBy)
-                    .doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
         }
 
-        return result;
+        return new PageRo<>(ResultDic.SUCCESS, "分页查询成功", pageInfo);
     }
 
 }

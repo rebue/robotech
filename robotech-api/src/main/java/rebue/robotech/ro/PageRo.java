@@ -2,6 +2,7 @@ package rebue.robotech.ro;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.github.pagehelper.PageInfo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -11,23 +12,23 @@ import lombok.ToString;
 import rebue.robotech.dic.ResultDic;
 
 /**
- * 带有ID的基本的返回值的对象类
- * 主要给添加方法返回生成后的ID
+ * 带有分页的基本的返回值的对象类
+ * 主要给分页查询返回生成后的分页信息
  */
 @ToString(callSuper = true)
 @Getter
 @Setter
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
-public class IdRo<ID> extends Ro {
+public class PageRo<T> extends Ro {
 
     @Schema(description = "返回系统生成的ID")
-    private ID id;
+    private PageInfo<T> page;
 
-    public IdRo(final ResultDic result, final String msg, final ID id) {
+    public PageRo(final ResultDic result, final String msg, final PageInfo<T> page) {
         setResult(result);
         setMsg(msg);
-        setId(id);
+        setPage(page);
     }
 
 }

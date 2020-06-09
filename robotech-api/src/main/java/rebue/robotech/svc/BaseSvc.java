@@ -2,8 +2,7 @@ package rebue.robotech.svc;
 
 import java.util.List;
 
-import com.github.pagehelper.PageInfo;
-
+import rebue.robotech.ro.PageRo;
 import rebue.robotech.ro.Ro;
 
 public interface BaseSvc<ID, MO, JO> {
@@ -52,12 +51,12 @@ public interface BaseSvc<ID, MO, JO> {
 
     MO getOne(MO mo);
 
-    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize);
+    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize);
 
-    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
+    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
 
-    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
+    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
 
-    PageInfo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
 }
