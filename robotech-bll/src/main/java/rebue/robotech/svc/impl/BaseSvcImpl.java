@@ -40,13 +40,14 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>>
+        implements BaseSvc<ID, MO, JO> {
 
     @Autowired
-    protected MAPPER    _mapper;
+    protected MAPPER _mapper;
 
     @Autowired
-    protected DAO       _dao;
+    protected DAO _dao;
 
     @Value("${robotech.appid:0}")
     private int         _appid;
@@ -63,17 +64,12 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Ro add0(final MO mo) {
-        log.info("svc.add: mo-", mo);
         try {
             final int result = _mapper.insertSelective(mo);
             if (result == 1) {
-                final String msg = "添加成功";
-                log.info("{}: mo-{}", msg, mo);
-                return new Ro(ResultDic.SUCCESS, msg);
+                return new Ro(ResultDic.SUCCESS, "添加成功");
             } else {
-                final String msg = "添加失败";
-                log.error("{}: mo-{}", msg, mo);
-                return new Ro(ResultDic.FAIL, msg);
+                return new Ro(ResultDic.FAIL, "添加失败");
             }
         } catch (final DuplicateKeyException e) {
             final String msg = "添加失败，唯一键重复：" + e.getCause().getMessage();
@@ -92,12 +88,9 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Ro modify(final MO mo) {
-        log.info("svc.modify: mo-{}", mo);
         try {
             if (_mapper.updateByPrimaryKeySelective(mo) == 1) {
-                final String msg = "修改成功";
-                log.info("{}: mo-{}", msg, mo);
-                return new Ro(ResultDic.SUCCESS, msg);
+                return new Ro(ResultDic.SUCCESS, "修改成功");
             } else {
                 final String msg = "修改失败";
                 log.error("{}: mo-{}", msg, mo);
@@ -120,12 +113,9 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Ro del(final ID id) {
-        log.info("svc.del: id-{}", id);
         final int result = _mapper.deleteByPrimaryKey(id);
         if (result == 1) {
-            final String msg = "删除成功";
-            log.info("{}: id-{}", msg, id);
-            return new Ro(ResultDic.SUCCESS, msg);
+            return new Ro(ResultDic.SUCCESS, "删除成功");
         } else {
             final String msg = "删除失败，找不到该记录";
             log.error("{}: id-{}", msg, id);
@@ -136,45 +126,38 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int insertSelective(final MO mo) {
-        log.info("svc.insertSelective: mo-{}", mo);
         return _mapper.insertSelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int updateByPrimaryKeySelective(final MO mo) {
-        log.info("svc.updateByPrimaryKeySelective: mo-{}", mo);
         return _mapper.updateByPrimaryKeySelective(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int deleteByPrimaryKey(final ID id) {
-        log.info("svc.deleteByPrimaryKey: id-{}", id);
         return _mapper.deleteByPrimaryKey(id);
     }
 
     @Override
     public List<MO> listAll() {
-        log.info("svc.listAll");
         return _mapper.selectAll();
     }
 
     @Override
     public List<JO> listJoAll() {
-        log.info("svc.listAll");
         return _dao.findAll();
     }
 
     @Override
     public List<MO> list(final MO mo) {
-        log.info("svc.list: mo-{}", mo);
         return _mapper.selectSelective(mo);
     }
 
     @Override
     public MO getOne(final MO mo) {
-        log.info("svc.getOne: mo-{}", mo);
         final List<MO> list = _mapper.selectSelective(mo);
         if (list.size() <= 0) {
             return null;
@@ -187,25 +170,21 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
 
     @Override
     public MO getById(final ID id) {
-        log.info("svc.getById: id-{}", id);
         return _mapper.selectByPrimaryKey(id);
     }
 
     @Override
     public JO getJoById(final ID id) {
-        log.info("svc.getJoById: id-{}", id);
         return _dao.findById(id).orElse(null);
     }
 
     @Override
     public boolean existByPrimaryKey(final ID id) {
-        log.info("svc.existByPrimaryKey: id-{}", id);
         return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public boolean existSelective(final MO mo) {
-        log.info("svc.existSelective: mo-{}", mo);
         return _mapper.existSelective(mo);
     }
 
@@ -225,9 +204,8 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
-        log.info("svc.list: qo-{}, pageNum-{}, pageSize-{}, orderBy-{}", qo, pageNum, pageSize, orderBy);
-
+    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy,
+            Integer limitPageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -248,10 +226,9 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
         if (orderBy == null) {
             result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
         } else {
-            result = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            result = PageHelper.startPage(pageNum, pageSize, orderBy)
+                    .doSelectPageInfo(() -> _mapper.selectSelective(qo));
         }
-
-        log.debug("result: " + result);
 
         return result;
     }
