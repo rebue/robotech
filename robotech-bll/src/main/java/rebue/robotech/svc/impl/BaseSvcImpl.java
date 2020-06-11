@@ -3,8 +3,8 @@ package rebue.robotech.svc.impl;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,10 +43,10 @@ import rebue.wheel.idworker.IdWorker3;
 @Slf4j
 public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
-    @Autowired
+    @Resource
     protected MAPPER    _mapper;
 
-    @Autowired
+    @Resource
     protected DAO       _dao;
 
     @Value("${robotech.appid:0}")
@@ -63,7 +63,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Ro add0(final MO mo) {
+    public Ro add(final MO mo) {
         try {
             final int result = _mapper.insertSelective(mo);
             if (result == 1) {
@@ -124,24 +124,6 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int insertSelective(final MO mo) {
-        return _mapper.insertSelective(mo);
-    }
-
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int updateByPrimaryKeySelective(final MO mo) {
-        return _mapper.updateByPrimaryKeySelective(mo);
-    }
-
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int deleteByPrimaryKey(final ID id) {
-        return _mapper.deleteByPrimaryKey(id);
-    }
-
-    @Override
     public List<MO> listAll() {
         return _mapper.selectAll();
     }
@@ -179,7 +161,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public boolean existByPrimaryKey(final ID id) {
+    public boolean existById(final ID id) {
         return _mapper.existByPrimaryKey(id);
     }
 
