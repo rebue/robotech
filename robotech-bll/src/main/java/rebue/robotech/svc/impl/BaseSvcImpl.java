@@ -3,8 +3,8 @@ package rebue.robotech.svc.impl;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,13 +41,13 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>>
+        implements BaseSvc<ID, MO, JO> {
 
-    @Resource
-    protected MAPPER    _mapper;
-
-    @Resource
-    protected DAO       _dao;
+    @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
+    protected MAPPER _mapper;
+    @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
+    protected DAO    _dao;
 
     @Value("${robotech.appid:0}")
     private int         _appid;
@@ -186,7 +186,8 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public PageRo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
+    public PageRo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy,
+            Integer limitPageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -207,7 +208,8 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
         if (orderBy == null) {
             pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
         } else {
-            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy)
+                    .doSelectPageInfo(() -> _mapper.selectSelective(qo));
         }
 
         return new PageRo<>(ResultDic.SUCCESS, "分页查询成功", pageInfo);

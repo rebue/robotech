@@ -1,6 +1,6 @@
 package rebue.robotech.api.impl;
 
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import rebue.robotech.api.BaseApi;
 import rebue.robotech.ro.PageRo;
@@ -8,7 +8,7 @@ import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 
 public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> implements BaseApi<ID, MO> {
-    @Resource
+    @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected SVC _svc;
 
     /**
@@ -41,7 +41,8 @@ public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> i
     }
 
     @Override
-    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy, final Integer limitPageSize) {
+    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy,
+            final Integer limitPageSize) {
         return _svc.list(qo, pageNum, pageSize, orderBy, limitPageSize);
     }
 
