@@ -1,42 +1,53 @@
 package rebue.robotech.svc;
 
-import java.util.List;
-
-import rebue.robotech.ro.PageRo;
+import rebue.robotech.ra.IdRa;
+import rebue.robotech.ra.ListRa;
+import rebue.robotech.ra.OkRa;
+import rebue.robotech.ra.PageRa;
+import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 
 public interface BaseSvc<ID, MO, JO> {
     // TODO : Svc : 在Spring的Bean加载完以后要调用此方法，否则在RabbitMQ里的回调线程调实现类的方法会没有任何反应
 //    void test();
 
-    Ro add(MO mo);
+    /**
+     * 添加
+     */
+    Ro<IdRa<ID>> add(MO mo);
 
-    Ro modify(MO mo);
+    /**
+     * 修改
+     */
+    Ro<?> modify(MO mo);
 
-    Ro del(ID id);
+    /**
+     * 删除
+     */
+    Ro<?> del(ID id);
 
-    List<MO> listAll();
+    Ro<PojoRa<MO>> getById(ID id);
 
-    List<JO> listJoAll();
+    Ro<PojoRa<JO>> getJoById(ID id);
 
-    List<MO> list(MO mo);
+    Ro<PojoRa<MO>> getOne(MO mo);
 
-    MO getById(ID id);
+    Ro<ListRa<MO>> listAll();
 
-    JO getJoById(ID id);
+    Ro<ListRa<JO>> listJoAll();
 
-    boolean existById(ID id);
+    Ro<ListRa<MO>> list(MO mo);
 
-    boolean existSelective(MO mo);
+    Ro<OkRa> existById(ID id);
 
-    MO getOne(MO mo);
+    Ro<OkRa> existSelective(MO mo);
 
-    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize);
+    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize);
 
-    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
+    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
 
-    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
+    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
 
-    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
 }

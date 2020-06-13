@@ -3,7 +3,9 @@ package rebue.robotech.api.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import rebue.robotech.api.BaseApi;
-import rebue.robotech.ro.PageRo;
+import rebue.robotech.ra.IdRa;
+import rebue.robotech.ra.PageRa;
+import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 
@@ -15,7 +17,7 @@ public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> i
      * 添加
      */
     @Override
-    public Ro add(final MO mo) {
+    public Ro<IdRa<ID>> add(final MO mo) {
         return svc.add(mo);
     }
 
@@ -23,7 +25,7 @@ public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> i
      * 修改
      */
     @Override
-    public Ro modify(final MO mo) {
+    public Ro<?> modify(final MO mo) {
         return svc.modify(mo);
     }
 
@@ -31,18 +33,17 @@ public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> i
      * 删除
      */
     @Override
-    public Ro del(final ID id) {
+    public Ro<?> del(final ID id) {
         return svc.del(id);
     }
 
     @Override
-    public MO getById(final ID id) {
+    public Ro<PojoRa<MO>> getById(final ID id) {
         return svc.getById(id);
     }
 
     @Override
-    public PageRo<MO> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy,
-            final Integer limitPageSize) {
+    public Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy, final Integer limitPageSize) {
         return svc.list(qo, pageNum, pageSize, orderBy, limitPageSize);
     }
 

@@ -1,26 +1,28 @@
 package rebue.robotech.api;
 
-import rebue.robotech.ro.PageRo;
+import rebue.robotech.ra.IdRa;
+import rebue.robotech.ra.PageRa;
+import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 
 public interface BaseApi<ID, MO> {
     /**
      * 添加
      */
-    Ro add(MO mo);
+    Ro<IdRa<ID>> add(MO mo);
 
     /**
      * 修改
      */
-    Ro modify(MO mo);
+    Ro<?> modify(MO mo);
 
     /**
      * 删除
      */
-    Ro del(ID id);
+    Ro<?> del(ID id);
 
-    MO getById(ID id);
+    Ro<PojoRa<MO>> getById(ID id);
 
-    PageRo<MO> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
 }
