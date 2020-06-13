@@ -20,9 +20,10 @@ import rebue.robotech.dic.ResultDic;
 @NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
 public class IdRo<ID> extends Ro {
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "返回系统生成的ID")
-    private ID id;
+    private ID                id;
 
     public IdRo(final ResultDic result, final String msg, final ID id) {
         setResult(result);

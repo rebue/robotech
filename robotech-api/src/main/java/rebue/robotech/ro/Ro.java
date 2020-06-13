@@ -1,5 +1,7 @@
 package rebue.robotech.ro;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -19,7 +21,8 @@ import rebue.robotech.dic.ResultDic;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "返回结果")
-public class Ro {
+public class Ro implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * 返回结果的类型
@@ -29,12 +32,12 @@ public class Ro {
      * -2: 警告-->不用回滚事务
      */
     @Schema(description = "返回结果的类型")
-    private ResultDic result;
+    private ResultDic         result;
 
     /**
      * 返回结果的信息
      */
     @Schema(description = "返回结果的信息")
-    private String    msg;
+    private String            msg;
 
 }
