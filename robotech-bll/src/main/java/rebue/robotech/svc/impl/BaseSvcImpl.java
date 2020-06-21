@@ -1,7 +1,5 @@
 package rebue.robotech.svc.impl;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.mapper.MybatisBaseMapper;
+import rebue.robotech.ra.CountRa;
 import rebue.robotech.ra.IdRa;
 import rebue.robotech.ra.ListRa;
 import rebue.robotech.ra.OkRa;
@@ -42,8 +41,8 @@ import rebue.wheel.idworker.IdWorker3;
  *    propagation(传播模式)=REQUIRED，readOnly=false，isolation(事务隔离级别)=READ_COMMITTED
  * </pre>
  */
-@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Slf4j
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
@@ -103,19 +102,12 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
 
     @Override
     public Ro<PojoRa<MO>> getOne(final MO mo) {
-        final List<MO> list = _mapper.selectSelective(mo);
-        if (list.size() <= 0) {
-            return new Ro<>(ResultDic.SUCCESS, "查询成功，但是查询结果为0");
-        } else if (list.size() > 1) {
-            return new Ro<>(ResultDic.WARN, "查询异常: 查询结果数量大于1");
-        } else {
-            return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(list.get(0)));
-        }
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_mapper.selectOne(mo).orElse(null)));
     }
 
     @Override
     public Ro<PojoRa<MO>> getById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_mapper.selectByPrimaryKey(id)));
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_mapper.selectByPrimaryKey(id).orElse(null)));
     }
 
     @Override
@@ -124,8 +116,23 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
+    public Ro<OkRa> existById(final ID id) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existByPrimaryKey(id)));
+    }
+
+    @Override
+    public Ro<OkRa> existSelective(final MO record) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existSelective(record)));
+    }
+
+    @Override
+    public Ro<CountRa> countSelective(final MO record) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new CountRa(_mapper.countSelective(record)));
+    }
+
+    @Override
     public Ro<ListRa<MO>> listAll() {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_mapper.selectAll()));
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_mapper.select(c -> c)));
     }
 
     @Override
@@ -136,32 +143,6 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     @Override
     public Ro<ListRa<MO>> list(final MO mo) {
         return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_mapper.selectSelective(mo)));
-    }
-
-    @Override
-    public Ro<OkRa> existById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existByPrimaryKey(id)));
-
-    }
-
-    @Override
-    public Ro<OkRa> existSelective(final MO mo) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existSelective(mo)));
-    }
-
-    @Override
-    public Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize) {
-        return list(qo, pageNum, pageSize, null, null);
-    }
-
-    @Override
-    public Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize, final Integer limitPageSize) {
-        return list(qo, pageNum, pageSize, null, limitPageSize);
-    }
-
-    @Override
-    public Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy) {
-        return list(qo, pageNum, pageSize, null, null);
     }
 
     @Override

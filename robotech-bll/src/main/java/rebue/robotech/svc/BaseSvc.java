@@ -1,5 +1,6 @@
 package rebue.robotech.svc;
 
+import rebue.robotech.ra.CountRa;
 import rebue.robotech.ra.IdRa;
 import rebue.robotech.ra.ListRa;
 import rebue.robotech.ra.OkRa;
@@ -30,24 +31,34 @@ public interface BaseSvc<ID, MO, JO> {
 
     Ro<PojoRa<JO>> getJoById(ID id);
 
+    // TODO 1.4.0版本暂时不好实现
     Ro<PojoRa<MO>> getOne(MO mo);
-
-    Ro<ListRa<MO>> listAll();
-
-    Ro<ListRa<JO>> listJoAll();
-
-    Ro<ListRa<MO>> list(MO mo);
 
     Ro<OkRa> existById(ID id);
 
     Ro<OkRa> existSelective(MO mo);
 
-    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize);
+    Ro<CountRa> countSelective(final MO record);
 
-    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, Integer limitPageSize);
+    Ro<ListRa<MO>> listAll();
 
-    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy);
+    Ro<ListRa<JO>> listJoAll();
 
+    Ro<ListRa<MO>> list(final MO mo);
+
+    default Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize) {
+        return list(qo, pageNum, pageSize, null, null);
+    }
+
+    default Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize, final Integer limitPageSize) {
+        return list(qo, pageNum, pageSize, null, limitPageSize);
+    }
+
+    default Ro<PageRa<MO>> list(final MO qo, final Integer pageNum, final Integer pageSize, final String orderBy) {
+        return list(qo, pageNum, pageSize, null, null);
+    }
+
+    // TODO 1.4.0版本暂时不好实现
     Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
 }
