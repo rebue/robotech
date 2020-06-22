@@ -15,21 +15,6 @@ import org.mybatis.dynamic.sql.update.UpdateDSLCompleter;
 import org.mybatis.dynamic.sql.update.render.UpdateStatementProvider;
 
 public interface MybatisBaseMapper<MO, ID> {
-//    int deleteByPrimaryKey(ID id);
-//
-//    int insert(MO mo);
-//
-//    int insertSelective(MO mo);
-//
-//    Optional<MO> selectByPrimaryKey(ID id);
-//
-//    int updateByPrimaryKeySelective(MO mo);
-//
-//    int updateByPrimaryKey(MO mo);
-//
-////    List<MO> selectAll();
-//
-
     int insert(InsertStatementProvider<MO> insertStatement);
 
     int insertMultiple(MultiRowInsertStatementProvider<MO> multipleInsertStatement);

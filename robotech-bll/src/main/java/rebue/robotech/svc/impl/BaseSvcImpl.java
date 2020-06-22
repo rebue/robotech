@@ -1,36 +1,30 @@
 package rebue.robotech.svc.impl;
 
-import javax.annotation.PostConstruct;
-
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-
-import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.mapper.MybatisBaseMapper;
-import rebue.robotech.ra.CountRa;
-import rebue.robotech.ra.IdRa;
-import rebue.robotech.ra.ListRa;
-import rebue.robotech.ra.OkRa;
-import rebue.robotech.ra.PageRa;
-import rebue.robotech.ra.PojoRa;
+import rebue.robotech.ra.*;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
 
+import javax.annotation.PostConstruct;
+
 /**
  * 服务实现层的父类
- * 
+ *
  * <pre>
  * 封装了一些常用的增删改查的方法，并同时提供了MyBatis和JPA两种操作数据库的方式
  * 鱼和熊掌可以兼得矣，但是在有了MyBatis之后，JPA很鸡肋，JPA大概会有种“既生瑜何生亮”的感觉
- * 
+ *
  * 注意：
  * 1. 查询数据库操作的方法，不用设置默认 @Transactional
  *    在类上方已经设置默认为 readOnly=true, propagation=Propagation.SUPPORTS
@@ -46,13 +40,12 @@ import rebue.wheel.idworker.IdWorker3;
 public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER    _mapper;
+    protected MAPPER _mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO       _dao;
-
-    @Value("${robotech.appid:0}")
-    private int         _appid;
+    protected DAO _dao;
     protected IdWorker3 _idWorker;
+    @Value("${robotech.appid:0}")
+    private int _appid;
 
     @PostConstruct
     public void init() {
@@ -163,11 +156,13 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
             throw new IllegalArgumentException(msg);
         }
 
+        ISelect select = qo == null ? () -> _mapper.select(c -> c) : () -> _mapper.selectSelective(qo);
+
         PageInfo<MO> pageInfo;
         if (orderBy == null) {
-            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
         } else {
-            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(() -> _mapper.selectSelective(qo));
+            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
         }
 
         return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(pageInfo));
