@@ -1,22 +1,18 @@
 package rebue.robotech.ra;
 
-import java.io.Serializable;
-
-import org.springframework.lang.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
 
 /**
  * 带有是否OK结果的附加内容
  * 主要给需要判断是否的系列查询方法使用
  */
-@Schema(description = "带有是否OK结果的附加内容")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor // 不知道@Data中默认包含的@RequiredArgsConstructor为何没起效
@@ -27,8 +23,7 @@ public class OkRa implements Serializable {
     /**
      * 返回是否OK
      */
-    @Schema(description = "返回是否OK")
     @NonNull
-    private Boolean           ok;
+    private Boolean ok;
 
 }
