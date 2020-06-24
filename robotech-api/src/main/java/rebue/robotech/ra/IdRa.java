@@ -13,7 +13,7 @@ import java.io.Serializable;
  * 带有ID的附加内容
  * 主要给添加方法返回生成后的ID
  *
- * @param <T> POJO类唯一标识的属性值
+ * @param <T> POJO类唯一标识的属性的类
  */
 @Data
 @NoArgsConstructor

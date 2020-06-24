@@ -26,10 +26,6 @@ public class Ro<T> implements Serializable {
 
     /**
      * 返回结果的类型
-     * 1: 成功
-     * 0: 参数错误
-     * -1: 失败 --》回滚事务
-     * -2: 警告 --》不用回滚事务
      */
     @NonNull
     private ResultDic result;
@@ -41,12 +37,14 @@ public class Ro<T> implements Serializable {
     private String msg;
 
     /**
-     * 返回结果的自定义编码(如果通过result已经能够满足需求，可不需要自定义编码，设为null或不设置即可)
+     * 返回结果的自定义编码
+     * (如果通过result已经能够满足需求，可不需要自定义编码，设为null或不设置即可)
      */
     private String code;
 
     /**
-     * 附加的内容(如果前面的属性已经能够满足需求，可不需要附加的内容，设为null或不设置即可)
+     * 附加的内容
+     * (如果前面的属性已经能够满足需求，可不需要附加的内容，设为null或不设置即可)
      */
     private T extra;
 }
