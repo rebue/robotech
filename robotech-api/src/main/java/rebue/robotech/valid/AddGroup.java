@@ -1,5 +1,7 @@
 package rebue.robotech.valid;
 
-public interface AddGroup {
+import javax.validation.groups.Default;
+
+public interface AddGroup extends Default {
 
 }
