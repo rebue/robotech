@@ -23,19 +23,19 @@
 			<dependency>
 				<groupId>com.github.rebue.robotech</groupId>
 				<artifactId>robotech-api</artifactId>
-				<version>${project.version}</version>
+				<version>1.2.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.github.rebue.robotech</groupId>
 				<artifactId>robotech-bll</artifactId>
-				<version>${project.version}</version>
+				<version>1.2.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.github.rebue.wheel</groupId>
 				<artifactId>wheel-core</artifactId>
-				<version>${project.version}</version>
+				<version>1.2.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
