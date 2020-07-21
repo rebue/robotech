@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
 import rebue.robotech.ra.IdRa;
+import rebue.robotech.ra.OkRa;
 import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
@@ -36,6 +37,8 @@ public interface BaseApi<ID, MO> {
     Ro<?> del(@NotNull ID id);
 
     Ro<PojoRa<MO>> getById(@NotNull ID id);
+
+    Ro<OkRa> existById(ID id);
 
     Ro<PageRa<MO>> list(@Valid MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
