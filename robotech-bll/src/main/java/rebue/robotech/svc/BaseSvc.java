@@ -3,7 +3,7 @@ package rebue.robotech.svc;
 import rebue.robotech.ra.CountRa;
 import rebue.robotech.ra.IdRa;
 import rebue.robotech.ra.ListRa;
-import rebue.robotech.ra.OkRa;
+import rebue.robotech.ra.BooleanRa;
 import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
@@ -34,9 +34,9 @@ public interface BaseSvc<ID, MO, JO> {
     // TODO 1.4.0版本暂时不好实现
     Ro<PojoRa<MO>> getOne(MO mo);
 
-    Ro<OkRa> existById(ID id);
+    Ro<BooleanRa> existById(ID id);
 
-    Ro<OkRa> existSelective(MO mo);
+    Ro<BooleanRa> existSelective(MO mo);
 
     Ro<CountRa> countSelective(final MO record);
 

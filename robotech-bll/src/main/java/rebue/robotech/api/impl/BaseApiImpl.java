@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import rebue.robotech.api.BaseApi;
 import rebue.robotech.ra.IdRa;
-import rebue.robotech.ra.OkRa;
+import rebue.robotech.ra.BooleanRa;
 import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
@@ -44,7 +44,7 @@ public abstract class BaseApiImpl<ID, MO, JO, SVC extends BaseSvc<ID, MO, JO>> i
     }
 
     @Override
-    public Ro<OkRa> existById(final ID id) {
+    public Ro<BooleanRa> existById(final ID id) {
         return svc.existById(id);
     }
 

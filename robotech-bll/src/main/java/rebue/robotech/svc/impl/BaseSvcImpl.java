@@ -109,13 +109,13 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     }
 
     @Override
-    public Ro<OkRa> existById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existByPrimaryKey(id)));
+    public Ro<BooleanRa> existById(final ID id) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new BooleanRa(_mapper.existByPrimaryKey(id)));
     }
 
     @Override
-    public Ro<OkRa> existSelective(final MO record) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new OkRa(_mapper.existSelective(record)));
+    public Ro<BooleanRa> existSelective(final MO record) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new BooleanRa(_mapper.existSelective(record)));
     }
 
     @Override
