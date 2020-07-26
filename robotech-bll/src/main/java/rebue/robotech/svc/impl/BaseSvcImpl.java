@@ -1,22 +1,26 @@
 package rebue.robotech.svc.impl;
 
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import rebue.robotech.dic.ResultDic;
-import rebue.robotech.mapper.MybatisBaseMapper;
-import rebue.robotech.ra.*;
-import rebue.robotech.ro.Ro;
+
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+import lombok.extern.slf4j.Slf4j;
+import rebue.robotech.mo.Mo;
+import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.wheel.idworker.IdWorker3;
-
-import javax.annotation.PostConstruct;
 
 /**
  * 服务实现层的父类
@@ -37,15 +41,16 @@ import javax.annotation.PostConstruct;
  */
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO, MAPPER extends MybatisBaseMapper<MO, ID>> implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO extends Mo<ID>, MAPPER extends MapperRootInterface<MO, ID>>
+        implements BaseSvc<ID, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER _mapper;
+    protected MAPPER    _mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO _dao;
+    protected DAO       _dao;
     protected IdWorker3 _idWorker;
     @Value("${robotech.appid:0}")
-    private int _appid;
+    private int         _appid;
 
     @PostConstruct
     public void init() {
@@ -55,15 +60,22 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
     /**
      * 添加
      */
+    @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Ro<IdRa<ID>> add(final MO mo) {
-        final int result = _mapper.insertSelective(mo);
-        if (result == 1) {
-            return new Ro<>(ResultDic.SUCCESS, "添加成功");
-        } else {
-            return new Ro<>(ResultDic.FAIL, "添加失败");
+    public Boolean add(final MO mo) {
+        if (mo.getIdType().equals("String")) {
+            if (StringUtils.isBlank((CharSequence) mo.getId())) {
+                mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
+            }
+        } else if (mo.getIdType().equals("Long")) {
+            // 如果id为空那么自动生成分布式id
+            if (mo.getId() == null || (Long) mo.getId() == 0) {
+                mo.setId((ID) _idWorker.getId());
+            }
         }
+
+        return _mapper.insertSelective(mo) == 1 ? true : false;
     }
 
     /**
@@ -71,12 +83,8 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Ro<?> modify(final MO mo) {
-        if (_mapper.updateByPrimaryKeySelective(mo) == 1) {
-            return new Ro<>(ResultDic.SUCCESS, "修改成功");
-        } else {
-            return new Ro<>(ResultDic.FAIL, "修改失败");
-        }
+    public Boolean modify(final MO mo) {
+        return _mapper.updateByPrimaryKeySelective(mo) == 1 ? true : false;
     }
 
     /**
@@ -84,62 +92,57 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Ro<?> del(final ID id) {
-        final int result = _mapper.deleteByPrimaryKey(id);
-        if (result == 1) {
-            return new Ro<>(ResultDic.SUCCESS, "删除成功");
-        } else {
-            return new Ro<>(ResultDic.FAIL, "删除失败，找不到该记录");
-        }
+    public Boolean del(final ID id) {
+        return _mapper.deleteByPrimaryKey(id) == 1 ? true : false;
     }
 
     @Override
-    public Ro<PojoRa<MO>> getOne(final MO mo) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_mapper.selectOne(mo).orElse(null)));
+    public MO getOne(final MO mo) {
+        return _mapper.selectOne(mo).orElse(null);
     }
 
     @Override
-    public Ro<PojoRa<MO>> getById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_mapper.selectByPrimaryKey(id).orElse(null)));
+    public MO getById(final ID id) {
+        return _mapper.selectByPrimaryKey(id).orElse(null);
     }
 
     @Override
-    public Ro<PojoRa<JO>> getJoById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_dao.findById(id).orElse(null)));
+    public JO getJoById(final ID id) {
+        return _dao.findById(id).orElse(null);
     }
 
     @Override
-    public Ro<BooleanRa> existById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new BooleanRa(_mapper.existByPrimaryKey(id)));
+    public Boolean existById(final ID id) {
+        return _mapper.existByPrimaryKey(id);
     }
 
     @Override
-    public Ro<BooleanRa> existSelective(final MO record) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new BooleanRa(_mapper.existSelective(record)));
+    public Boolean existSelective(final MO record) {
+        return _mapper.existSelective(record);
     }
 
     @Override
-    public Ro<CountRa> countSelective(final MO record) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new CountRa(_mapper.countSelective(record)));
+    public Long countSelective(final MO record) {
+        return _mapper.countSelective(record);
     }
 
     @Override
-    public Ro<ListRa<MO>> listAll() {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_mapper.select(c -> c)));
+    public List<MO> listAll() {
+        return _mapper.select(c -> c);
     }
 
     @Override
-    public Ro<ListRa<JO>> listJoAll() {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_dao.findAll()));
+    public List<JO> listJoAll() {
+        return _dao.findAll();
     }
 
     @Override
-    public Ro<ListRa<MO>> list(final MO mo) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new ListRa<>(_mapper.selectSelective(mo)));
+    public List<MO> list(final MO mo) {
+        return _mapper.selectSelective(mo);
     }
 
     @Override
-    public Ro<PageRa<MO>> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
+    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -156,16 +159,13 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO,
             throw new IllegalArgumentException(msg);
         }
 
-        ISelect select = qo == null ? () -> _mapper.select(c -> c) : () -> _mapper.selectSelective(qo);
+        final ISelect select = qo == null ? () -> _mapper.select(c -> c) : () -> _mapper.selectSelective(qo);
 
-        PageInfo<MO> pageInfo;
         if (orderBy == null) {
-            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
+            return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
         } else {
-            pageInfo = PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
+            return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
         }
-
-        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(pageInfo));
     }
 
 }

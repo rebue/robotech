@@ -1,4 +1,4 @@
-package rebue.robotech.mapper;
+package rebue.robotech.mybatis;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.mybatis.dynamic.sql.select.render.SelectStatementProvider;
 import org.mybatis.dynamic.sql.update.UpdateDSLCompleter;
 import org.mybatis.dynamic.sql.update.render.UpdateStatementProvider;
 
-public interface MybatisBaseMapper<MO, ID> {
+public interface MapperRootInterface<MO, ID> {
     int insert(InsertStatementProvider<MO> insertStatement);
 
     int insertMultiple(MultiRowInsertStatementProvider<MO> multipleInsertStatement);
