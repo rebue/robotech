@@ -25,7 +25,7 @@ public interface BaseSvc<ID, MO, JO> {
      * 添加
      */
     @Validated(AddGroup.class)
-    Boolean add(@Valid MO mo);
+    ID add(@Valid MO mo);
 
     /**
      * 修改

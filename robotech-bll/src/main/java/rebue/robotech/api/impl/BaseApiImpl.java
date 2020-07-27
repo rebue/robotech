@@ -21,7 +21,7 @@ public abstract class BaseApiImpl<ID, MO extends Mo<ID>, JO, SVC extends BaseSvc
      */
     @Override
     public Ro<IdRa<ID>> add(final MO mo) {
-        if (svc.add(mo)) {
+        if (svc.add(mo) != null) {
             return new Ro<>(ResultDic.SUCCESS, "添加成功", null, new IdRa<>(mo.getId()));
         } else {
             return new Ro<>(ResultDic.FAIL, "添加失败");

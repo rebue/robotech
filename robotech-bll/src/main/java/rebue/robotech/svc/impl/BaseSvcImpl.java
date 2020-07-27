@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.mo.Mo;
@@ -63,7 +63,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean add(final MO mo) {
+    public ID add(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
@@ -75,7 +75,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
             }
         }
 
-        return _mapper.insertSelective(mo) == 1 ? true : false;
+        return _mapper.insertSelective(mo) == 1 ? mo.getId() : null;
     }
 
     /**
@@ -162,9 +162,9 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
         final ISelect select = qo == null ? () -> _mapper.select(c -> c) : () -> _mapper.selectSelective(qo);
 
         if (orderBy == null) {
-            return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
+            return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
         } else {
-            return PageHelper.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
+            return PageMethod.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
         }
     }
 
