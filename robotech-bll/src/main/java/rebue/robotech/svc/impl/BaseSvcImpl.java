@@ -46,11 +46,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER    mapper;
+    protected MAPPER    _mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO       dao;
+    protected DAO       _dao;
     @Autowired
-    protected Mapper    dozerMapper;
+    protected Mapper    _dozerMapper;
 
     protected IdWorker3 _idWorker;
     @Value("${robotech.appid:0}")
@@ -70,7 +70,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ID add(final ADD_TO to) {
-        final MO mo = dozerMapper.map(to, getMoClass());
+        final MO mo = _dozerMapper.map(to, getMoClass());
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
@@ -82,7 +82,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
             }
         }
 
-        return mapper.insertSelective(mo) == 1 ? mo.getId() : null;
+        return _mapper.insertSelective(mo) == 1 ? mo.getId() : null;
     }
 
     /**
@@ -91,8 +91,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Boolean modify(final MODIFY_TO to) {
-        final MO mo = dozerMapper.map(to, getMoClass());
-        return mapper.updateByPrimaryKeySelective(mo) == 1 ? true : false;
+        final MO mo = _dozerMapper.map(to, getMoClass());
+        return _mapper.updateByPrimaryKeySelective(mo) == 1 ? true : false;
     }
 
     /**
@@ -101,56 +101,56 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Boolean del(final ID id) {
-        return mapper.deleteByPrimaryKey(id) == 1 ? true : false;
+        return _mapper.deleteByPrimaryKey(id) == 1 ? true : false;
     }
 
     @Override
     public MO getOne(final QUERY_TO qo) {
-        final MO mo = dozerMapper.map(qo, getMoClass());
-        return mapper.selectOne(mo).orElse(null);
+        final MO mo = _dozerMapper.map(qo, getMoClass());
+        return _mapper.selectOne(mo).orElse(null);
     }
 
     @Override
     public MO getById(final ID id) {
-        return mapper.selectByPrimaryKey(id).orElse(null);
+        return _mapper.selectByPrimaryKey(id).orElse(null);
     }
 
     @Override
     public JO getJoById(final ID id) {
-        return dao.findById(id).orElse(null);
+        return _dao.findById(id).orElse(null);
     }
 
     @Override
     public Boolean existById(final ID id) {
-        return mapper.existByPrimaryKey(id);
+        return _mapper.existByPrimaryKey(id);
     }
 
     @Override
     public Boolean existSelective(final QUERY_TO qo) {
-        final MO mo = dozerMapper.map(qo, getMoClass());
-        return mapper.existSelective(mo);
+        final MO mo = _dozerMapper.map(qo, getMoClass());
+        return _mapper.existSelective(mo);
     }
 
     @Override
     public Long countSelective(final QUERY_TO qo) {
-        final MO mo = dozerMapper.map(qo, getMoClass());
-        return mapper.countSelective(mo);
+        final MO mo = _dozerMapper.map(qo, getMoClass());
+        return _mapper.countSelective(mo);
     }
 
     @Override
     public List<MO> listAll() {
-        return mapper.select(c -> c);
+        return _mapper.select(c -> c);
     }
 
     @Override
     public List<JO> listJoAll() {
-        return dao.findAll();
+        return _dao.findAll();
     }
 
     @Override
     public List<MO> list(final QUERY_TO qo) {
-        final MO mo = dozerMapper.map(qo, getMoClass());
-        return mapper.selectSelective(mo);
+        final MO mo = _dozerMapper.map(qo, getMoClass());
+        return _mapper.selectSelective(mo);
     }
 
     @Override
@@ -173,10 +173,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
 
         ISelect select;
         if (qo == null) {
-            select = () -> mapper.select(c -> c);
+            select = () -> _mapper.select(c -> c);
         } else {
-            final MO mo = dozerMapper.map(qo, getMoClass());
-            select = () -> mapper.selectSelective(mo);
+            final MO mo = _dozerMapper.map(qo, getMoClass());
+            select = () -> _mapper.selectSelective(mo);
         }
 
         if (orderBy == null) {
