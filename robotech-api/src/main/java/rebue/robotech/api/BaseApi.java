@@ -6,16 +6,16 @@ import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 
-public interface BaseApi<ID, MO> {
+public interface BaseApi<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO> {
     /**
      * 添加
      */
-    Ro<IdRa<ID>> add(MO mo);
+    Ro<IdRa<ID>> add(ADD_TO to);
 
     /**
      * 修改
      */
-    Ro<?> modify(MO mo);
+    Ro<?> modify(MODIFY_TO to);
 
     /**
      * 删除
@@ -26,6 +26,6 @@ public interface BaseApi<ID, MO> {
 
     Ro<BooleanRa> existById(ID id);
 
-    Ro<PageRa<MO>> list(MO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+    Ro<PageRa<MO>> list(QUERY_TO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
 
 }

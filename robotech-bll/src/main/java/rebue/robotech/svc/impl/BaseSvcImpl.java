@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.dozermapper.core.Mapper;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
@@ -41,13 +42,16 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO extends Mo<ID>, MAPPER extends MapperRootInterface<MO, ID>>
-        implements BaseSvc<ID, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER    _mapper;
+    protected MAPPER    mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO       _dao;
+    protected DAO       dao;
+    @Autowired
+    protected Mapper    dozerMapper;
+
     protected IdWorker3 _idWorker;
     @Value("${robotech.appid:0}")
     private int         _appid;
@@ -57,13 +61,16 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
         _idWorker = new IdWorker3(_appid);
     }
 
+    protected abstract Class<MO> getMoClass();
+
     /**
      * 添加
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID add(final MO mo) {
+    public ID add(final ADD_TO to) {
+        final MO mo = dozerMapper.map(to, getMoClass());
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
@@ -75,7 +82,7 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
             }
         }
 
-        return _mapper.insertSelective(mo) == 1 ? mo.getId() : null;
+        return mapper.insertSelective(mo) == 1 ? mo.getId() : null;
     }
 
     /**
@@ -83,8 +90,9 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean modify(final MO mo) {
-        return _mapper.updateByPrimaryKeySelective(mo) == 1 ? true : false;
+    public Boolean modify(final MODIFY_TO to) {
+        final MO mo = dozerMapper.map(to, getMoClass());
+        return mapper.updateByPrimaryKeySelective(mo) == 1 ? true : false;
     }
 
     /**
@@ -93,56 +101,60 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Boolean del(final ID id) {
-        return _mapper.deleteByPrimaryKey(id) == 1 ? true : false;
+        return mapper.deleteByPrimaryKey(id) == 1 ? true : false;
     }
 
     @Override
-    public MO getOne(final MO mo) {
-        return _mapper.selectOne(mo).orElse(null);
+    public MO getOne(final QUERY_TO qo) {
+        final MO mo = dozerMapper.map(qo, getMoClass());
+        return mapper.selectOne(mo).orElse(null);
     }
 
     @Override
     public MO getById(final ID id) {
-        return _mapper.selectByPrimaryKey(id).orElse(null);
+        return mapper.selectByPrimaryKey(id).orElse(null);
     }
 
     @Override
     public JO getJoById(final ID id) {
-        return _dao.findById(id).orElse(null);
+        return dao.findById(id).orElse(null);
     }
 
     @Override
     public Boolean existById(final ID id) {
-        return _mapper.existByPrimaryKey(id);
+        return mapper.existByPrimaryKey(id);
     }
 
     @Override
-    public Boolean existSelective(final MO record) {
-        return _mapper.existSelective(record);
+    public Boolean existSelective(final QUERY_TO qo) {
+        final MO mo = dozerMapper.map(qo, getMoClass());
+        return mapper.existSelective(mo);
     }
 
     @Override
-    public Long countSelective(final MO record) {
-        return _mapper.countSelective(record);
+    public Long countSelective(final QUERY_TO qo) {
+        final MO mo = dozerMapper.map(qo, getMoClass());
+        return mapper.countSelective(mo);
     }
 
     @Override
     public List<MO> listAll() {
-        return _mapper.select(c -> c);
+        return mapper.select(c -> c);
     }
 
     @Override
     public List<JO> listJoAll() {
-        return _dao.findAll();
+        return dao.findAll();
     }
 
     @Override
-    public List<MO> list(final MO mo) {
-        return _mapper.selectSelective(mo);
+    public List<MO> list(final QUERY_TO qo) {
+        final MO mo = dozerMapper.map(qo, getMoClass());
+        return mapper.selectSelective(mo);
     }
 
     @Override
-    public PageInfo<MO> list(final MO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
+    public PageInfo<MO> list(final QUERY_TO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -159,7 +171,13 @@ public abstract class BaseSvcImpl<ID, JO, DAO extends JpaRepository<JO, ID>, MO 
             throw new IllegalArgumentException(msg);
         }
 
-        final ISelect select = qo == null ? () -> _mapper.select(c -> c) : () -> _mapper.selectSelective(qo);
+        ISelect select;
+        if (qo == null) {
+            select = () -> mapper.select(c -> c);
+        } else {
+            final MO mo = dozerMapper.map(qo, getMoClass());
+            select = () -> mapper.selectSelective(mo);
+        }
 
         if (orderBy == null) {
             return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
