@@ -46,6 +46,8 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
 
     List<MO> listAll();
 
+    List<MO> listAll(@Valid LIST_TO qo);
+
     List<JO> listJoAll();
 
     PageInfo<MO> list(@Valid LIST_TO qo);
