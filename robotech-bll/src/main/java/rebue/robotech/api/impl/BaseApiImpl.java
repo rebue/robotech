@@ -2,6 +2,7 @@ package rebue.robotech.api.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.api.BaseApi;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ra.BooleanRa;
@@ -10,9 +11,16 @@ import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
+import rebue.robotech.to.ListTo;
 
-public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO>>
-        implements BaseApi<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO> {
+@Slf4j
+public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends ListTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO>>
+        implements BaseApi<ID, ADD_TO, MODIFY_TO, LIST_TO, MO> {
+    /**
+     * 限制每页能查询的大小
+     */
+    protected int _limitPageSize = 100;
+
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected SVC svc;
 
@@ -65,8 +73,13 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO, SVC e
     }
 
     @Override
-    public Ro<PageRa<MO>> list(final QUERY_TO qo, final Integer pageNum, final Integer pageSize, final String orderBy, final Integer limitPageSize) {
-        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(svc.list(qo, pageNum, pageSize, orderBy, limitPageSize)));
+    public Ro<PageRa<MO>> list(final LIST_TO qo) {
+        if (qo.getPageSize() != null && qo.getPageSize() > _limitPageSize) {
+            final String msg = "pageSize不能大于" + _limitPageSize;
+            log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(svc.list(qo)));
     }
 
 }

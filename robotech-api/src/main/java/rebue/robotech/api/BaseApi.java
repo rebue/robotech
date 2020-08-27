@@ -6,7 +6,7 @@ import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 
-public interface BaseApi<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO> {
+public interface BaseApi<ID, ADD_TO, MODIFY_TO, LIST_TO, MO> {
     /**
      * 添加
      */
@@ -26,6 +26,6 @@ public interface BaseApi<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO> {
 
     Ro<BooleanRa> existById(ID id);
 
-    Ro<PageRa<MO>> list(QUERY_TO qo, Integer pageNum, Integer pageSize, String orderBy, Integer limitPageSize);
+    Ro<PageRa<MO>> list(LIST_TO qo);
 
 }

@@ -17,10 +17,10 @@ import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
 
-import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
+import rebue.robotech.to.ListTo;
 import rebue.wheel.idworker.IdWorker3;
 
 /**
@@ -40,10 +40,9 @@ import rebue.wheel.idworker.IdWorker3;
  *    propagation(传播模式)=REQUIRED，readOnly=false，isolation(事务隔离级别)=READ_COMMITTED
  * </pre>
  */
-@Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends ListTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -105,7 +104,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     }
 
     @Override
-    public MO getOne(final QUERY_TO qo) {
+    public MO getOne(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.selectOne(mo).orElse(null);
     }
@@ -126,13 +125,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     }
 
     @Override
-    public Boolean existSelective(final QUERY_TO qo) {
+    public Boolean existSelective(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.existSelective(mo);
     }
 
     @Override
-    public Long countSelective(final QUERY_TO qo) {
+    public Long countSelective(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.countSelective(mo);
     }
@@ -148,41 +147,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, QUERY_TO, MO extends Mo
     }
 
     @Override
-    public List<MO> list(final QUERY_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
-        return _mapper.selectSelective(mo);
-    }
-
-    @Override
-    public PageInfo<MO> list(final QUERY_TO qo, Integer pageNum, Integer pageSize, final String orderBy, Integer limitPageSize) {
-        if (pageNum == null) {
-            pageNum = 1;
-        }
-        if (pageSize == null) {
-            pageSize = 5;
-        }
-
-        if (limitPageSize == null) {
-            limitPageSize = 50;
-        }
-        if (pageSize > limitPageSize) {
-            final String msg = "pageSize不能大于" + limitPageSize;
-            log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-
-        ISelect select;
-        if (qo == null) {
-            select = () -> _mapper.select(c -> c);
+    public PageInfo<MO> list(final LIST_TO qo) {
+        final MO      mo     = _dozerMapper.map(qo, getMoClass());
+        final ISelect select = () -> _mapper.selectSelective(mo);
+        if (qo.getOrderBy() == null) {
+            return PageMethod.startPage(qo.getPageNum(), qo.getPageSize()).doSelectPageInfo(select);
         } else {
-            final MO mo = _dozerMapper.map(qo, getMoClass());
-            select = () -> _mapper.selectSelective(mo);
-        }
-
-        if (orderBy == null) {
-            return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
-        } else {
-            return PageMethod.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
+            return PageMethod.startPage(qo.getPageNum(), qo.getPageSize(), qo.getOrderBy()).doSelectPageInfo(select);
         }
     }
 
