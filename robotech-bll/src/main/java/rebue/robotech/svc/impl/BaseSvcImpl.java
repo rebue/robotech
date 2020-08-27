@@ -137,14 +137,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends
     }
 
     @Override
-    public List<MO> listAll() {
-        return _mapper.select(c -> c);
-    }
-
-    @Override
     public List<MO> listAll(final LIST_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
-        return _mapper.selectSelective(mo);
+        if (qo == null) {
+            return _mapper.select(c -> c);
+        } else {
+            final MO mo = _dozerMapper.map(qo, getMoClass());
+            return _mapper.selectSelective(mo);
+        }
     }
 
     @Override

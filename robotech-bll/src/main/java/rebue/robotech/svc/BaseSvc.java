@@ -44,8 +44,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
 
     Long countSelective(@Valid final ONE_TO qo);
 
-    List<MO> listAll();
-
     List<MO> listAll(@Valid LIST_TO qo);
 
     List<JO> listJoAll();
