@@ -41,8 +41,8 @@ import rebue.wheel.idworker.IdWorker3;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends ListTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends ListTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -103,6 +103,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends
         return _mapper.deleteByPrimaryKey(id) == 1 ? true : false;
     }
 
+    /**
+     * 删除
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Boolean delSelective(final DEL_TO to) {
+        final MO mo = _dozerMapper.map(to, getMoClass());
+        return _mapper.deleteSelective(mo) == 1 ? true : false;
+    }
+
     @Override
     public MO getOne(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
@@ -153,7 +163,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends
 
     @Override
     public PageInfo<MO> list(final LIST_TO qo) {
-        final MO      mo     = _dozerMapper.map(qo, getMoClass());
+        final MO mo = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         if (qo.getOrderBy() == null) {
             return PageMethod.startPage(qo.getPageNum(), qo.getPageSize()).doSelectPageInfo(select);

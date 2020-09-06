@@ -14,7 +14,7 @@ import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.ListTo;
 
 @Slf4j
-public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO extends ListTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO>>
+public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends ListTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO>>
         implements BaseApi<ID, ADD_TO, MODIFY_TO, LIST_TO, MO> {
     /**
      * 限制每页能查询的大小

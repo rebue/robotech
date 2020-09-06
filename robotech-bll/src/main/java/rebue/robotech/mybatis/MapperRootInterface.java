@@ -44,6 +44,8 @@ public interface MapperRootInterface<MO, ID> {
 
     int deleteByPrimaryKey(ID id);
 
+    int deleteSelective(MO record);
+
     long count(SelectStatementProvider selectStatement);
 
     long count(CountDSLCompleter completer);

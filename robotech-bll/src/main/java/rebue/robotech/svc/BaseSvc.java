@@ -14,7 +14,7 @@ import com.github.pagehelper.PageInfo;
 //参数是POJO类时用 @Valid 注解在参数类型的前面进行修饰；
 //而如果是普通参数，则在方法的上方写上 @Validated 注解，具体约束的注解直接写在参数类型的前面
 @Validated
-public interface BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
+public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
     /**
      * 添加
      */
@@ -31,6 +31,11 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, ONE_TO, LIST_TO, MO, JO> {
      * 删除
      */
     Boolean del(@NotNull ID id);
+
+    /**
+     * 删除
+     */
+    Boolean delSelective(@Valid DEL_TO to);
 
     MO getOne(@Valid ONE_TO qo);
 
