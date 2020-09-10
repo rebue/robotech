@@ -42,7 +42,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<?> modify(final MODIFY_TO to) {
-        if (svc.modify(to)) {
+        if (svc.modifyById(to)) {
             return new Ro<>(ResultDic.SUCCESS, "修改成功");
         } else {
             return new Ro<>(ResultDic.FAIL, "修改失败");
@@ -54,7 +54,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<?> del(final ID id) {
-        if (svc.del(id)) {
+        if (svc.delById(id)) {
             return new Ro<>(ResultDic.SUCCESS, "删除成功");
         } else {
             return new Ro<>(ResultDic.FAIL, "删除失败，找不到该记录");
