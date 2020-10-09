@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +73,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID add(final ADD_TO to) {
+    public ID add(@Valid final ADD_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
@@ -95,7 +97,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean modifyById(final MODIFY_TO to) {
+    public Boolean modifyById(@Valid final MODIFY_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         return _mapper.updateByPrimaryKeySelective(mo) == 1;
     }
@@ -108,7 +110,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean delById(final ID id) {
+    public Boolean delById(@NotNull final ID id) {
         return _mapper.deleteByPrimaryKey(id) == 1;
     }
 
@@ -120,7 +122,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Integer delSelective(final DEL_TO to) {
+    public Integer delSelective(@Valid final DEL_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         return _mapper.deleteSelective(mo);
     }
@@ -131,7 +133,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @param qo 要获取记录需要符合的条件
      */
     @Override
-    public MO getOne(final ONE_TO qo) {
+    public MO getOne(@Valid final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.selectOne(mo).orElse(null);
     }
@@ -143,7 +145,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return MyBatis Model对象
      */
     @Override
-    public MO getById(final ID id) {
+    public MO getById(@NotNull final ID id) {
         return _mapper.selectByPrimaryKey(id).orElse(null);
     }
 
@@ -154,7 +156,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return JPA对象
      */
     @Override
-    public JO getJoById(final ID id) {
+    public JO getJoById(@NotNull final ID id) {
         return _dao.findById(id).orElse(null);
     }
 
@@ -162,7 +164,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 判断指定ID的记录是否存在
      */
     @Override
-    public Boolean existById(final ID id) {
+    public Boolean existById(@NotNull final ID id) {
         return _mapper.existByPrimaryKey(id);
     }
 
@@ -170,7 +172,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 判断符合条件的记录是否存在
      */
     @Override
-    public Boolean existSelective(final ONE_TO qo) {
+    public Boolean existSelective(@Valid final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.existSelective(mo);
     }
@@ -179,7 +181,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 统计符合条件的记录数
      */
     @Override
-    public Long countSelective(final ONE_TO qo) {
+    public Long countSelective(@Valid final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.countSelective(mo);
     }
@@ -191,7 +193,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询列表
      */
     @Override
-    public List<MO> listAll(final LIST_TO qo) {
+    public List<MO> listAll(@Valid final LIST_TO qo) {
         if (qo == null) {
             return _mapper.select(c -> c);
         } else {
@@ -217,7 +219,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> list(final LIST_TO qo) {
+    public PageInfo<MO> list(@Valid final LIST_TO qo) {
         final MO      mo     = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         if (qo.getOrderBy() == null) {
