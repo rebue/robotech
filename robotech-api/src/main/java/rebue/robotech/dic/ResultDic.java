@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 返回结果的字典类
+ * 返回结果的字典
  * 1: 成功
  * -1: 参数错误
  * -2: 失败 --》回滚事务
