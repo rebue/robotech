@@ -1,15 +1,17 @@
 package rebue.robotech.ro;
 
+import java.io.Serializable;
+
+import org.springframework.lang.NonNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import rebue.robotech.dic.ResultDic;
-
-import java.io.Serializable;
 
 /**
  * 返回结果
@@ -28,23 +30,29 @@ public class Ro<T> implements Serializable {
      * 返回结果的类型
      */
     @NonNull
-    private ResultDic result;
+    private ResultDic         result;
 
     /**
      * 返回结果的信息
      */
     @NonNull
-    private String msg;
+    private String            msg;
 
     /**
      * 返回结果的自定义编码
      * (如果通过result已经能够满足需求，可不需要自定义编码，设为null或不设置即可)
      */
-    private String code;
+    private String            code;
 
     /**
      * 附加的内容
      * (如果前面的属性已经能够满足需求，可不需要附加的内容，设为null或不设置即可)
      */
-    private T extra;
+    private T                 extra;
+
+    public Ro(ResultDic result, String msg, T extra) {
+        this.result = result;
+        this.msg = msg;
+        this.extra = extra;
+    }
 }
