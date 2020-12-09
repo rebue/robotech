@@ -5,8 +5,10 @@ import java.io.Serializable;
 import javax.validation.constraints.Positive;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public abstract class ListTo implements Serializable {
     private static final long serialVersionUID = 1L;
 
