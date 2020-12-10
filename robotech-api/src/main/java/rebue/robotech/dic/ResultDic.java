@@ -12,8 +12,8 @@ import lombok.Getter;
  * 返回结果的字典
  * 1: 成功
  * -1: 参数错误
- * -2: 失败 --》回滚事务
- * -3: 警告 --》不用回滚事务
+ * -2: 失败(系统出现异常)
+ * -3: 警告(用户操作错误)
  */
 @AllArgsConstructor
 @Getter
@@ -27,13 +27,13 @@ public enum ResultDic implements EnumBase {
      */
     PARAM_ERROR(-1, "参数错误"),
     /**
-     * -2: 失败 --》回滚事务
+     * -2: 失败(系统出现异常)
      */
-    FAIL(-2, "失败 --》回滚事务"),
+    FAIL(-2, "失败"),
     /**
-     * -3: 警告 --》不用回滚事务
+     * -3: 警告(用户操作错误)
      */
-    WARN(-3, "警告 --》不用回滚事务");
+    WARN(-3, "警告");
 
     private final int    code;
     private final String desc;
