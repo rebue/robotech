@@ -22,7 +22,7 @@ import com.github.pagehelper.page.PageMethod;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
-import rebue.robotech.to.ListTo;
+import rebue.robotech.to.PageTo;
 import rebue.wheel.idworker.IdWorker3;
 
 /**
@@ -43,8 +43,8 @@ import rebue.wheel.idworker.IdWorker3;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends ListTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -68,6 +68,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 添加记录
      *
      * @param to 添加的参数
+     *
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则返回null
      */
     @SuppressWarnings("unchecked")
@@ -79,7 +80,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
             }
-        } else if (mo.getIdType().equals("Long")) {
+        }
+        else if (mo.getIdType().equals("Long")) {
             // 如果id为空那么自动生成分布式id
             if (mo.getId() == null || (Long) mo.getId() == 0) {
                 mo.setId((ID) _idWorker.getId());
@@ -93,6 +95,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过ID修改记录内容
      *
      * @param to 修改的参数，必须包含ID
+     *
      * @return 如果成功，且仅修改一条记录，返回true，否则返回false
      */
     @Override
@@ -106,6 +109,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过ID删除记录
      *
      * @param id 要删除记录的ID
+     *
      * @return 如果成功，且删除一条记录，返回true，否则返回false
      */
     @Override
@@ -118,6 +122,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过条件删除记录
      *
      * @param to 要删除记录需要符合的条件
+     *
      * @return 返回删除的记录数
      */
     @Override
@@ -142,6 +147,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 根据ID获取一条MyBatis Model对象的记录
      *
      * @param id 要获取对象的ID
+     *
      * @return MyBatis Model对象
      */
     @Override
@@ -153,6 +159,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 根据ID获取一条JPA对象的记录
      *
      * @param id 要获取对象的ID
+     *
      * @return JPA对象
      */
     @Override
@@ -187,19 +194,26 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     /**
-     * 查询列表
+     * 条件查询
      *
      * @param qo 查询条件
+     *
      * @return 查询列表
      */
     @Override
-    public List<MO> listAll(@Valid final LIST_TO qo) {
-        if (qo == null) {
-            return _mapper.select(c -> c);
-        } else {
-            final MO mo = _dozerMapper.map(qo, getMoClass());
-            return _mapper.selectSelective(mo);
-        }
+    public List<MO> list(@Valid final LIST_TO qo) {
+        final MO mo = _dozerMapper.map(qo, getMoClass());
+        return _mapper.selectSelective(mo);
+    }
+
+    /**
+     * 查询所有
+     *
+     * @return 查询列表
+     */
+    @Override
+    public List<MO> listAll() {
+        return _mapper.select(c -> c);
     }
 
     /**
@@ -216,15 +230,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 分页查询列表
      *
      * @param qo 查询条件
+     *
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> list(@Valid final LIST_TO qo) {
-        final MO      mo     = _dozerMapper.map(qo, getMoClass());
+    public PageInfo<MO> page(@Valid final LIST_TO qo) {
+        final MO mo = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         if (qo.getOrderBy() == null) {
             return PageMethod.startPage(qo.getPageNum(), qo.getPageSize()).doSelectPageInfo(select);
-        } else {
+        }
+        else {
             return PageMethod.startPage(qo.getPageNum(), qo.getPageSize(), qo.getOrderBy()).doSelectPageInfo(select);
         }
     }

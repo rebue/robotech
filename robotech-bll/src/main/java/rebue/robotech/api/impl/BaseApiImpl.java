@@ -11,10 +11,10 @@ import rebue.robotech.ra.PageRa;
 import rebue.robotech.ra.PojoRa;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
-import rebue.robotech.to.ListTo;
+import rebue.robotech.to.PageTo;
 
 @Slf4j
-public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends ListTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO>>
+public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends PageTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO>>
         implements BaseApi<ID, ADD_TO, MODIFY_TO, LIST_TO, MO> {
     /**
      * 限制每页能查询的大小
@@ -73,13 +73,13 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     @Override
-    public Ro<PageRa<MO>> list(final LIST_TO qo) {
+    public Ro<PageRa<MO>> page(final LIST_TO qo) {
         if (qo.getPageSize() != null && qo.getPageSize() > _limitPageSize) {
             final String msg = "pageSize不能大于" + _limitPageSize;
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(svc.list(qo)));
+        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(svc.page(qo)));
     }
 
 }

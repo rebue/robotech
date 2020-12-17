@@ -26,6 +26,6 @@ public interface BaseApi<ID, ADD_TO, MODIFY_TO, LIST_TO, MO> {
 
     Ro<BooleanRa> existById(ID id);
 
-    Ro<PageRa<MO>> list(LIST_TO qo);
+    Ro<PageRa<MO>> page(LIST_TO qo);
 
 }
