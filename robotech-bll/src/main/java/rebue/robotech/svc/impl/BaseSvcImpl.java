@@ -43,8 +43,8 @@ import rebue.wheel.idworker.IdWorker3;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -234,8 +234,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(@Valid final LIST_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
+    public PageInfo<MO> page(@Valid final PAGE_TO qo) {
+        final MO      mo     = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         if (qo.getOrderBy() == null) {
             return PageMethod.startPage(qo.getPageNum(), qo.getPageSize()).doSelectPageInfo(select);

@@ -9,12 +9,31 @@ import org.springframework.validation.annotation.Validated;
 
 import com.github.pagehelper.PageInfo;
 
-// 在接口上方必须写上 @Validated 注解；
-// 有分组时，在方法上方必须写上 @Validated 注解及分组；
-// 参数是POJO类时用 @Valid 注解在参数类型的前面进行修饰；
-// 而如果是普通参数，则在方法的上方写上 @Validated 注解，具体约束的注解直接写在参数类型的前面
+import rebue.robotech.to.PageTo;
+
+/**
+ * 基础服务层接口
+ * 
+ * 在接口上方必须写上 @Validated 注解；
+ * 有分组时，在方法上方必须写上 @Validated 注解及分组；
+ * 参数是POJO类时用 @Valid 注解在参数类型的前面进行修饰；
+ * 而如果是普通参数，则在方法的上方写上 @Validated 注解，具体约束的注解直接写在参数类型的前面
+ * 
+ * @author zbz
+ *
+ * @param <ID>        ID的类型
+ * @param <ADD_TO>    添加参数的类型
+ * @param <MODIFY_TO> 修改参数的类型
+ * @param <DEL_TO>    删除参数的类型
+ * @param <ONE_TO>    单个参数的类型
+ * @param <LIST_TO>   列表参数的类型
+ * @param <PAGE_TO>   分页参数的类型
+ * @param <MO>        Mybatis模型对象的类型
+ * @param <JO>        JPA实体对象的类型
+ * 
+ */
 @Validated
-public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO> {
+public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO, JO> {
     /**
      * 添加记录
      *
@@ -123,6 +142,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, MO, JO>
      *
      * @return 查询到的分页信息
      */
-    PageInfo<MO> page(@Valid LIST_TO qo);
+    PageInfo<MO> page(@Valid PAGE_TO qo);
 
 }
