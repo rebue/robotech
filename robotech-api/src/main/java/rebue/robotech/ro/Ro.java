@@ -39,6 +39,11 @@ public class Ro<T> implements Serializable {
     private String            msg;
 
     /**
+     * 详情
+     */
+    private String            detail;
+
+    /**
      * 返回结果的自定义编码
      * (如果通过result已经能够满足需求，可不需要自定义编码，设为null或不设置即可)
      */
@@ -52,8 +57,8 @@ public class Ro<T> implements Serializable {
 
     public Ro(final ResultDic result, final String msg, final T extra) {
         this.result = result;
-        this.msg    = msg;
-        this.extra  = extra;
+        this.msg = msg;
+        this.extra = extra;
     }
 
 }
