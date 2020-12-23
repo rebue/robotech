@@ -31,7 +31,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public Ro<IdRa<ID>> add(final ADD_TO to) {
         final ID id = _svc.add(to);
         if (id != null) {
-            return new Ro<>(ResultDic.SUCCESS, "添加成功", null, new IdRa<>(id));
+            return new Ro<>(ResultDic.SUCCESS, "添加成功", new IdRa<>(id));
         }
         else {
             return new Ro<>(ResultDic.FAIL, "添加失败");
@@ -67,12 +67,12 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     @Override
     public Ro<PojoRa<MO>> getById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new PojoRa<>(_svc.getById(id)));
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", new PojoRa<>(_svc.getById(id)));
     }
 
     @Override
     public Ro<BooleanRa> existById(final ID id) {
-        return new Ro<>(ResultDic.SUCCESS, "查询成功", null, new BooleanRa(_svc.existById(id)));
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", new BooleanRa(_svc.existById(id)));
     }
 
     @Override
@@ -82,7 +82,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", null, new PageRa<>(_svc.page(qo)));
+        return new Ro<>(ResultDic.SUCCESS, "分页查询成功", new PageRa<>(_svc.page(qo)));
     }
 
 }
