@@ -23,6 +23,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
+import rebue.wheel.exception.RuntimeExceptionX;
 import rebue.wheel.idworker.IdWorker3;
 
 /**
@@ -44,7 +45,7 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -69,7 +70,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @param to 添加的参数
      *
-     * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则返回null
+     * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -87,8 +88,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
                 mo.setId((ID) _idWorker.getId());
             }
         }
+        final int rowCount = _mapper.insertSelective(mo);
+        if (rowCount != 1) {
+            throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
+        }
+        return mo.getId();
 
-        return _mapper.insertSelective(mo) == 1 ? mo.getId() : null;
     }
 
     /**
@@ -96,13 +101,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @param to 修改的参数，必须包含ID
      *
-     * @return 如果成功，且仅修改一条记录，返回true，否则返回false
+     * @return 如果成功，且仅修改一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean modifyById(@Valid final MODIFY_TO to) {
-        final MO mo = _dozerMapper.map(to, getMoClass());
-        return _mapper.updateByPrimaryKeySelective(mo) == 1;
+    public void modifyById(@Valid final MODIFY_TO to) {
+        final MO  mo       = _dozerMapper.map(to, getMoClass());
+        final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
+        if (rowCount != 1) {
+            throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
+        }
     }
 
     /**
@@ -110,12 +118,15 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @param id 要删除记录的ID
      *
-     * @return 如果成功，且删除一条记录，返回true，否则返回false
+     * @return 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Boolean delById(@NotNull final ID id) {
-        return _mapper.deleteByPrimaryKey(id) == 1;
+    public void delById(@NotNull final ID id) {
+        final int rowCount = _mapper.deleteByPrimaryKey(id);
+        if (rowCount != 1) {
+            throw new RuntimeExceptionX("删除记录异常，影响行数为" + rowCount);
+        }
     }
 
     /**

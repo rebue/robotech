@@ -15,7 +15,7 @@ import rebue.robotech.to.PageTo;
 
 @Slf4j
 public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO>>
-    implements BaseApi<ID, ADD_TO, MODIFY_TO, PAGE_TO, MO> {
+        implements BaseApi<ID, ADD_TO, MODIFY_TO, PAGE_TO, MO> {
     /**
      * 限制每页能查询的大小
      */
@@ -29,13 +29,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<IdRa<ID>> add(final ADD_TO to) {
-        final ID id = _svc.add(to);
-        if (id != null) {
-            return new Ro<>(ResultDic.SUCCESS, "添加成功", new IdRa<>(id));
-        }
-        else {
-            return new Ro<>(ResultDic.FAIL, "添加失败");
-        }
+        return new Ro<>(ResultDic.SUCCESS, "添加成功", new IdRa<>(_svc.add(to)));
     }
 
     /**
@@ -43,12 +37,8 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<?> modify(final MODIFY_TO to) {
-        if (_svc.modifyById(to)) {
-            return new Ro<>(ResultDic.SUCCESS, "修改成功");
-        }
-        else {
-            return new Ro<>(ResultDic.FAIL, "修改失败");
-        }
+        _svc.modifyById(to);
+        return new Ro<>(ResultDic.SUCCESS, "修改成功");
     }
 
     /**
@@ -56,12 +46,8 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<?> del(final ID id) {
-        if (_svc.delById(id)) {
-            return new Ro<>(ResultDic.SUCCESS, "删除成功");
-        }
-        else {
-            return new Ro<>(ResultDic.FAIL, "删除失败，找不到该记录");
-        }
+        _svc.delById(id);
+        return new Ro<>(ResultDic.SUCCESS, "删除成功");
 
     }
 
