@@ -108,6 +108,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public void modifyById(@Valid final MODIFY_TO to) {
         final MO  mo       = _dozerMapper.map(to, getMoClass());
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
+        if (rowCount == 0) {
+            throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
+        }
         if (rowCount != 1) {
             throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
         }
@@ -124,6 +127,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void delById(@NotNull final ID id) {
         final int rowCount = _mapper.deleteByPrimaryKey(id);
+        if (rowCount == 0) {
+            throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
+        }
         if (rowCount != 1) {
             throw new RuntimeExceptionX("删除记录异常，影响行数为" + rowCount);
         }
@@ -163,7 +169,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getById(@NotNull final ID id) {
-        return _mapper.selectByPrimaryKey(id).orElse(null);
+        return _mapper.selectByPrimaryKey(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
     }
 
     /**
@@ -175,7 +181,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public JO getJoById(@NotNull final ID id) {
-        return _dao.findById(id).orElse(null);
+        return _dao.findById(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
     }
 
     /**
