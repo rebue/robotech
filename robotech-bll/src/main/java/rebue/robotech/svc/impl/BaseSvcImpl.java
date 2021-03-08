@@ -45,7 +45,7 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -72,11 +72,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
-    @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ID add(@Valid final ADD_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
+        return addMo(mo);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public ID addMo(@Valid final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
@@ -93,7 +99,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
         return mo.getId();
-
     }
 
     /**
@@ -106,7 +111,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void modifyById(@Valid final MODIFY_TO to) {
-        final MO  mo       = _dozerMapper.map(to, getMoClass());
+        final MO mo = _dozerMapper.map(to, getMoClass());
+        modifyMoById(mo);
+    }
+
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void modifyMoById(@Valid final MO mo) {
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
