@@ -1,15 +1,13 @@
 package rebue.robotech.svc;
 
-import java.util.List;
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageInfo;
+import org.springframework.validation.annotation.Validated;
+import rebue.robotech.to.PageTo;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
-import org.springframework.validation.annotation.Validated;
-
-import com.github.pagehelper.PageInfo;
-
-import rebue.robotech.to.PageTo;
+import java.util.List;
 
 /**
  * 基础服务层接口
@@ -154,6 +152,18 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @return 查询JPA对象列表
      */
     List<JO> listJoAll();
+
+    /**
+     * 分页查询列表
+     *
+     * @param select   选择器
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @param orderBy  排序字段
+     *
+     * @return 查询到的分页信息
+     */
+    PageInfo<MO> page(ISelect select, Integer pageNum, Integer pageSize, String orderBy);
 
     /**
      * 分页查询列表

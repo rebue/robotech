@@ -1,30 +1,27 @@
 package rebue.robotech.svc.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
+import com.github.dozermapper.core.Mapper;
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.github.dozermapper.core.Mapper;
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.page.PageMethod;
-
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.exception.RuntimeExceptionX;
 import rebue.wheel.idworker.IdWorker3;
+
+import javax.annotation.PostConstruct;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 服务实现层的父类
@@ -45,7 +42,7 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -85,7 +82,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public ID addMo(@Valid final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
-                mo.setId((ID) UUID.randomUUID().toString().replaceAll("-", ""));
+                mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
             }
         }
         else if (mo.getIdType().equals("Long")) {
@@ -257,6 +254,26 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 分页查询列表
      *
+     * @param select   选择器
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @param orderBy  排序字段
+     *
+     * @return 查询到的分页信息
+     */
+    @Override
+    public PageInfo<MO> page(ISelect select, Integer pageNum, Integer pageSize, String orderBy) {
+        if (StringUtils.isBlank(orderBy)) {
+            return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
+        }
+        else {
+            return PageMethod.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
+        }
+    }
+
+    /**
+     * 分页查询列表
+     *
      * @param qo 查询条件
      *
      * @return 查询到的分页信息
@@ -265,12 +282,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public PageInfo<MO> page(@Valid final PAGE_TO qo) {
         final MO      mo     = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
-        if (qo.getOrderBy() == null) {
-            return PageMethod.startPage(qo.getPageNum(), qo.getPageSize()).doSelectPageInfo(select);
-        }
-        else {
-            return PageMethod.startPage(qo.getPageNum(), qo.getPageSize(), qo.getOrderBy()).doSelectPageInfo(select);
-        }
+        return this.page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }
 
 }
