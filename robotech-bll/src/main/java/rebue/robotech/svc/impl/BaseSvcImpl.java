@@ -18,8 +18,6 @@ import rebue.wheel.exception.RuntimeExceptionX;
 import rebue.wheel.idworker.IdWorker3;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,7 +69,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID add(@Valid final ADD_TO to) {
+    public ID add(final ADD_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         return addMo(mo);
     }
@@ -79,7 +77,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID addMo(@Valid final MO mo) {
+    public ID addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
@@ -107,14 +105,14 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void modifyById(@Valid final MODIFY_TO to) {
+    public void modifyById(final MODIFY_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         modifyMoById(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void modifyMoById(@Valid final MO mo) {
+    public void modifyMoById(final MO mo) {
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
@@ -133,7 +131,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void delById(@NotNull final ID id) {
+    public void delById(final ID id) {
         final int rowCount = _mapper.deleteByPrimaryKey(id);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
@@ -152,7 +150,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Integer delSelective(@Valid final DEL_TO to) {
+    public Integer delSelective(final DEL_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
         return _mapper.deleteSelective(mo);
     }
@@ -163,7 +161,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @param qo 要获取记录需要符合的条件
      */
     @Override
-    public MO getOne(@Valid final ONE_TO qo) {
+    public MO getOne(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.selectOne(mo).orElse(null);
     }
@@ -176,7 +174,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return MyBatis Model对象
      */
     @Override
-    public MO getById(@NotNull final ID id) {
+    public MO getById(final ID id) {
         return _mapper.selectByPrimaryKey(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
     }
 
@@ -188,7 +186,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return JPA对象
      */
     @Override
-    public JO getJoById(@NotNull final ID id) {
+    public JO getJoById(final ID id) {
         return _dao.findById(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
     }
 
@@ -196,7 +194,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 判断指定ID的记录是否存在
      */
     @Override
-    public Boolean existById(@NotNull final ID id) {
+    public Boolean existById(final ID id) {
         return _mapper.existByPrimaryKey(id);
     }
 
@@ -204,7 +202,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 判断符合条件的记录是否存在
      */
     @Override
-    public Boolean existSelective(@Valid final ONE_TO qo) {
+    public Boolean existSelective(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.existSelective(mo);
     }
@@ -213,7 +211,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 统计符合条件的记录数
      */
     @Override
-    public Long countSelective(@Valid final ONE_TO qo) {
+    public Long countSelective(final ONE_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.countSelective(mo);
     }
@@ -226,7 +224,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询列表
      */
     @Override
-    public List<MO> list(@Valid final LIST_TO qo) {
+    public List<MO> list(final LIST_TO qo) {
         final MO mo = _dozerMapper.map(qo, getMoClass());
         return _mapper.selectSelective(mo);
     }
@@ -279,7 +277,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(@Valid final PAGE_TO qo) {
+    public PageInfo<MO> page(final PAGE_TO qo) {
         final MO      mo     = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         return this.page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());

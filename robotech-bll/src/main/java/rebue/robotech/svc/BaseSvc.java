@@ -12,11 +12,15 @@ import java.util.List;
 /**
  * 基础服务层接口
  *
- * 在接口上方必须写上 @Validated 注解；
- * 有分组时，在方法上方必须写上 @Validated 注解及分组；
- * 参数是POJO类时用 @Valid 注解在参数类型的前面进行修饰；
- * 而如果是普通参数，则在方法的上方写上 @Validated 注解，具体约束的注解直接写在参数类型的前面
- *
+ * <pre>
+ * 1. 在接口上方必须写上 @Validated 注解
+ * 2. 参数是POJO类时用 @Valid 注解在参数类型的前面进行修饰
+ *    参数是普通参数时，直接在参数类型的前面加上具体约束的注解
+ * 3. (待验证)有分组时，在方法上方必须写上 @Validated 注解及分组
+ * 4. 踩坑留痕：
+ *    如果方法的返回值为void，在方法上方加上 @Valid 注解会出现异常，报HV000132错误
+ * </pre>
+ * 
  * @author zbz
  *
  * @param <ID>        ID的类型
@@ -39,7 +43,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
-    @Validated
     ID add(@Valid ADD_TO to);
 
     /**
@@ -49,7 +52,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
-    @Validated
     ID addMo(@Valid MO mo);
 
     /**
@@ -59,7 +61,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @return 如果成功，且仅修改一条记录，正常返回，否则会抛出运行时异常
      */
-    @Validated
     void modifyById(@Valid MODIFY_TO to);
 
     /**
@@ -69,7 +70,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @return 如果成功，且仅修改一条记录，正常返回，否则会抛出运行时异常
      */
-    @Validated
     void modifyMoById(@Valid MO mo);
 
     /**
@@ -163,7 +163,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @return 查询到的分页信息
      */
-    PageInfo<MO> page(ISelect select, Integer pageNum, Integer pageSize, String orderBy);
+    PageInfo<MO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
 
     /**
      * 分页查询列表
