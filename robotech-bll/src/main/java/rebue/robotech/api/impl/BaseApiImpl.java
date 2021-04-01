@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.api.BaseApi;
 import rebue.robotech.dic.ResultDic;
+import rebue.robotech.mo.Mo;
 import rebue.robotech.ra.BooleanRa;
 import rebue.robotech.ra.IdRa;
 import rebue.robotech.ra.PageRa;
@@ -14,7 +15,7 @@ import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 
 @Slf4j
-public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO>>
+public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO>>
         implements BaseApi<ID, ADD_TO, MODIFY_TO, PAGE_TO, MO> {
     /**
      * 限制每页能查询的大小
@@ -29,7 +30,7 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Ro<IdRa<ID>> add(final ADD_TO to) {
-        return new Ro<>(ResultDic.SUCCESS, "添加成功", new IdRa<>(_svc.add(to)));
+        return new Ro<>(ResultDic.SUCCESS, "添加成功", new IdRa<>(_svc.add(to).getId()));
     }
 
     /**

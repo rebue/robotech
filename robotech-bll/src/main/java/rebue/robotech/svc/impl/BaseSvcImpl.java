@@ -1,25 +1,28 @@
 package rebue.robotech.svc.impl;
 
-import com.github.dozermapper.core.Mapper;
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.page.PageMethod;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.github.dozermapper.core.Mapper;
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
+
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.exception.RuntimeExceptionX;
 import rebue.wheel.idworker.IdWorker3;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 服务实现层的父类
@@ -60,6 +63,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     protected abstract Class<MO> getMoClass();
 
+    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> getThisSvc();
+
     /**
      * 添加记录
      *
@@ -69,15 +74,15 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID add(final ADD_TO to) {
+    public MO add(final ADD_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
-        return addMo(mo);
+        return getThisSvc().addMo(mo);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public ID addMo(final MO mo) {
+    public MO addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
@@ -93,7 +98,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
-        return mo.getId();
+        return getThisSvc().getById(mo.getId());
     }
 
     /**
@@ -105,14 +110,14 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void modifyById(final MODIFY_TO to) {
+    public MO modifyById(final MODIFY_TO to) {
         final MO mo = _dozerMapper.map(to, getMoClass());
-        modifyMoById(mo);
+        return getThisSvc().modifyMoById(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void modifyMoById(final MO mo) {
+    public MO modifyMoById(final MO mo) {
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
@@ -120,6 +125,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (rowCount != 1) {
             throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
         }
+        return getThisSvc().getById(mo.getId());
     }
 
     /**
@@ -260,7 +266,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(ISelect select, Integer pageNum, Integer pageSize, String orderBy) {
+    public PageInfo<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
         if (StringUtils.isBlank(orderBy)) {
             return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
         }
@@ -280,7 +286,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public PageInfo<MO> page(final PAGE_TO qo) {
         final MO      mo     = _dozerMapper.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
-        return this.page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
+        return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }
 
 }
