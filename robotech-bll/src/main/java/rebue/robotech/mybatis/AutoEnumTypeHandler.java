@@ -10,7 +10,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rebue.robotech.dic.EnumBase;
+import rebue.robotech.dic.Dic;
 
 /**
  * mybatis自动处理枚举类型的转换
@@ -19,7 +19,7 @@ import rebue.robotech.dic.EnumBase;
  * 2. 配置文件中配置
  * mybatis.configuration.default-enum-type-handler=rebue.robotech.mybatis.AutoEnumTypeHandler
  */
-public class AutoEnumTypeHandler<E extends Enum<E> & EnumBase> extends BaseTypeHandler<E> {
+public class AutoEnumTypeHandler<E extends Enum<E> & Dic> extends BaseTypeHandler<E> {
     private final static Logger _log = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
 
     private BaseTypeHandler<E> typeHandler = null;
@@ -30,9 +30,9 @@ public class AutoEnumTypeHandler<E extends Enum<E> & EnumBase> extends BaseTypeH
         if (type == null) {
             throw new IllegalArgumentException("Type argument cannot be null");
         }
-        // 如果实现了EnumBase则使用我们自定义的转换器
-        if (EnumBase.class.isAssignableFrom(type)) {
-            // TODO 去除泛型警告及优化基于EnumBase查找的代码
+        // 如果实现了Dic则使用我们自定义的转换器
+        if (Dic.class.isAssignableFrom(type)) {
+            // TODO 去除泛型警告及优化基于Dic查找的代码
             typeHandler = new rebue.robotech.mybatis.EnumTypeHandler(type);
         }
         // 默认转换器也可换成EnumOrdinalTypeHandler

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * 枚举的基础接口<br>
  */
-public interface EnumBase {
+public interface Dic {
 
     /**
      * @return jackson序列化的值

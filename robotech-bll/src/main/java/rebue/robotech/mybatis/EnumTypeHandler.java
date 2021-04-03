@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
-import rebue.robotech.dic.EnumBase;
+import rebue.robotech.dic.Dic;
 
-public class EnumTypeHandler<E extends Enum<?> & EnumBase> extends BaseTypeHandler<EnumBase> {
+public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Dic> {
     private final Class<E> type;
 
     public EnumTypeHandler(final Class<E> type) {
@@ -30,7 +30,7 @@ public class EnumTypeHandler<E extends Enum<?> & EnumBase> extends BaseTypeHandl
      * @throws SQLException
      */
     @Override
-    public void setNonNullParameter(final PreparedStatement ps, final int i, final EnumBase parameter,
+    public void setNonNullParameter(final PreparedStatement ps, final int i, final Dic parameter,
             final JdbcType jdbcType) throws SQLException {
         ps.setInt(i, parameter.getCode());
     }
@@ -44,7 +44,7 @@ public class EnumTypeHandler<E extends Enum<?> & EnumBase> extends BaseTypeHandl
      * @throws SQLException
      */
     @Override
-    public EnumBase getNullableResult(final ResultSet rs, final String columnName) throws SQLException {
+    public Dic getNullableResult(final ResultSet rs, final String columnName) throws SQLException {
         final int code = rs.getInt(columnName);
         return rs.wasNull() ? null : codeOf(code);
     }
@@ -58,7 +58,7 @@ public class EnumTypeHandler<E extends Enum<?> & EnumBase> extends BaseTypeHandl
      * @throws SQLException
      */
     @Override
-    public EnumBase getNullableResult(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Dic getNullableResult(final ResultSet rs, final int columnIndex) throws SQLException {
         final int code = rs.getInt(columnIndex);
         return rs.wasNull() ? null : codeOf(code);
     }
@@ -72,14 +72,14 @@ public class EnumTypeHandler<E extends Enum<?> & EnumBase> extends BaseTypeHandl
      * @throws SQLException
      */
     @Override
-    public EnumBase getNullableResult(final CallableStatement cs, final int columnIndex) throws SQLException {
+    public Dic getNullableResult(final CallableStatement cs, final int columnIndex) throws SQLException {
         final int code = cs.getInt(columnIndex);
         return cs.wasNull() ? null : codeOf(code);
     }
 
     private E codeOf(final int code) {
         try {
-            return EnumUtil.codeOf(type, code);
+            return EnumUtils.codeOf(type, code);
         } catch (final Exception e) {
             throw new IllegalArgumentException(
                     "Cannot convert " + code + " to " + type.getSimpleName() + " by code value.", e);

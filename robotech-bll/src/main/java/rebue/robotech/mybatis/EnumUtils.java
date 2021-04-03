@@ -1,9 +1,9 @@
 package rebue.robotech.mybatis;
 
-import rebue.robotech.dic.EnumBase;
+import rebue.robotech.dic.Dic;
 
-public class EnumUtil {
-    public static <E extends Enum<?> & EnumBase> E codeOf(final Class<E> enumClass, final int code) {
+public class EnumUtils {
+    public static <E extends Enum<?> & Dic> E codeOf(final Class<E> enumClass, final int code) {
         final E[] enumConstants = enumClass.getEnumConstants();
         for (final E e : enumConstants) {
             if (e.getCode() == code) {
