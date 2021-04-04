@@ -11,7 +11,7 @@ public interface Dic {
      * @return jackson序列化的值
      */
     @JsonValue // Jackson在序列化时，只序列化 @JsonValue 标注的值
-    int getCode();
+    byte getCode();
 
     String getName();
 

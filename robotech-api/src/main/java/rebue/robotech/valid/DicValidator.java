@@ -8,12 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 import rebue.robotech.dic.Dic;
 import rebue.robotech.dic.DicUtils;
 
-public class DicValidator implements ConstraintValidator<ValidDic, Object> {
+public class DicValidator implements ConstraintValidator<DicValid, Object> {
     // 枚举校验注解
-    private ValidDic annotation;
+    private DicValid annotation;
 
     @Override
-    public void initialize(final ValidDic constraintAnnotation) {
+    public void initialize(final DicValid constraintAnnotation) {
         annotation = constraintAnnotation;
     }
 
@@ -34,15 +34,15 @@ public class DicValidator implements ConstraintValidator<ValidDic, Object> {
         final Class<?> targetClass = annotation.target();
 
         if (!targetClass.isEnum()) {
-            throw new IllegalArgumentException("@EnumValid的target必须是枚举类型");
+            throw new IllegalArgumentException("@DicValid的target必须是枚举类型");
         }
 
         if (!Dic.class.isAssignableFrom(targetClass)) {
-            throw new IllegalArgumentException("@EnumValid的target必须实现Dic接口");
+            throw new IllegalArgumentException("@DicValid的target必须实现Dic接口");
         }
 
         // 判断是否包含该值
-        return DicUtils.isValid(targetClass, Integer.valueOf(valueStr));
+        return DicUtils.isValid(targetClass, Byte.valueOf(valueStr));
     }
 
 }
