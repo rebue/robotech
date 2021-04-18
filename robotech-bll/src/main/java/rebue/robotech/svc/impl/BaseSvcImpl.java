@@ -43,7 +43,7 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER    _mapper;
@@ -125,7 +125,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (rowCount != 1) {
             throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
         }
-        return getThisSvc().getById(mo.getId());
+        // XXX 注意这里是this，而不是getThisSvc()，这是避免使用到了缓存
+        return this.getById(mo.getId());
     }
 
     /**
