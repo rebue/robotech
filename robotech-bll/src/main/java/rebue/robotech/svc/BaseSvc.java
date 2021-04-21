@@ -24,7 +24,7 @@ import rebue.robotech.to.PageTo;
  * 4. 踩坑留痕：
  *    如果方法的返回值为void，在方法上方加上 @Valid 注解会出现异常，报HV000132错误
  * </pre>
- * 
+ *
  * @author zbz
  *
  * @param <ID>        ID的类型
@@ -97,7 +97,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件
+     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
      */
     MO getOne(@Valid ONE_TO qo);
 
@@ -106,7 +106,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @param id 要获取对象的ID
      *
-     * @return MyBatis Model对象
+     * @return MyBatis Model对象，如果查找不到则返回null
      */
     MO getById(@NotNull ID id);
 
@@ -115,7 +115,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @param id 要获取对象的ID
      *
-     * @return JPA对象
+     * @return JPA对象，如果查找不到则返回null
      */
     JO getJoById(@NotNull ID id);
 

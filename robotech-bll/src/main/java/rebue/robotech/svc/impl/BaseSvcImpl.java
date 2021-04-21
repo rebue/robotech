@@ -165,7 +165,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件
+     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
      */
     @Override
     public MO getOne(final ONE_TO qo) {
@@ -178,11 +178,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @param id 要获取对象的ID
      *
-     * @return MyBatis Model对象
+     * @return MyBatis Model对象，如果查找不到则返回null
      */
     @Override
     public MO getById(final ID id) {
-        return _mapper.selectByPrimaryKey(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
+        return _mapper.selectByPrimaryKey(id).orElse(null);
     }
 
     /**
@@ -190,11 +190,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @param id 要获取对象的ID
      *
-     * @return JPA对象
+     * @return JPA对象，如果查找不到则返回null
      */
     @Override
     public JO getJoById(final ID id) {
-        return _dao.findById(id).orElseThrow(() -> new RuntimeExceptionX("找不到记录"));
+        return _dao.findById(id).orElse(null);
     }
 
     /**
