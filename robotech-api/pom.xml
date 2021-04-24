@@ -11,9 +11,10 @@
 	<artifactId>robotech-api</artifactId>
 
 	<dependencies>
+		<!-- 使用字符串的一些帮助库 -->
 		<dependency>
-			<groupId>com.github.rebue.wheel</groupId>
-			<artifactId>wheel-core</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
 		<!-- 枚举用@JsonValue、@JsonCreator注解来自定义序列化 -->
