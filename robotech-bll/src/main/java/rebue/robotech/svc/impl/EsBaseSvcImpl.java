@@ -19,9 +19,9 @@ import org.elasticsearch.client.RestHighLevelClient;
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.so.So;
 import rebue.robotech.svc.EsBaseSvc;
-import rebue.wheel.GenericTypeUtils;
-import rebue.wheel.PojoUtils;
-import rebue.wheel.exception.RuntimeExceptionX;
+import rebue.wheel.core.GenericTypeUtils;
+import rebue.wheel.core.PojoUtils;
+import rebue.wheel.core.exception.RuntimeExceptionX;
 
 @Slf4j
 public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
