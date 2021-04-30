@@ -2,6 +2,8 @@ package rebue.robotech.svc.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -16,6 +18,7 @@ import com.github.dozermapper.core.Mapper;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
+import com.google.common.base.CaseFormat;
 
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
@@ -272,7 +275,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
         }
         else {
-            return PageMethod.startPage(pageNum, pageSize, orderBy).doSelectPageInfo(select);
+            // 将orderBy由小驼峰格式转化为数据库规范的大写下划线格式
+            final String newOrderBy = Stream.of(orderBy.split(",")).map(item -> {
+                final String[] split = item.trim().split(" ");
+                final String   field = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, split[0]);
+                return field + (split.length > 1 ? " " + split[1] : "");
+            }).collect(Collectors.joining(","));
+            return PageMethod.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
         }
     }
 
