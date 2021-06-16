@@ -240,6 +240,18 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     /**
+     * 根据ID列表查询
+     *
+     * @param ids ID列表
+     *
+     * @return 查询列表
+     */
+    @Override
+    public List<MO> listIn(final List<ID> ids) {
+        return _mapper.selectIn(ids);
+    }
+
+    /**
      * 查询所有
      *
      * @return 查询列表

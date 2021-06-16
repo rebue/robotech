@@ -30,9 +30,9 @@ public interface MapperRootInterface<MO, ID> {
     int update(UpdateDSLCompleter completer);
 
     // 下面两个update的方法是静态方法，不能不写方法体
-//    static UpdateDSL<UpdateModel> updateAllColumns(MO record, UpdateDSL<UpdateModel> dsl);
-//
-//    static UpdateDSL<UpdateModel> updateSelectiveColumns(MO record, UpdateDSL<UpdateModel> dsl);
+    // static UpdateDSL<UpdateModel> updateAllColumns(MO record, UpdateDSL<UpdateModel> dsl);
+    //
+    // static UpdateDSL<UpdateModel> updateSelectiveColumns(MO record, UpdateDSL<UpdateModel> dsl);
 
     int updateByPrimaryKey(MO record);
 
@@ -63,6 +63,8 @@ public interface MapperRootInterface<MO, ID> {
     List<MO> selectDistinct(SelectDSLCompleter completer);
 
     List<MO> selectSelective(MO mo);
+
+    List<MO> selectIn(List<ID> ids);
 
     Optional<MO> selectOne(MO mo);
 

@@ -144,6 +144,15 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     List<MO> list(@Valid final LIST_TO qo);
 
     /**
+     * 根据ID列表查询
+     *
+     * @param ids ID列表
+     *
+     * @return 查询列表
+     */
+    List<MO> listIn(final List<ID> ids);
+
+    /**
      * 查询所有
      *
      * @return 查询列表
