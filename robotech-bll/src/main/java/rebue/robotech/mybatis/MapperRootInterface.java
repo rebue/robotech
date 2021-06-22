@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.mybatis.dynamic.sql.BasicColumn;
 import org.mybatis.dynamic.sql.delete.DeleteDSLCompleter;
 import org.mybatis.dynamic.sql.delete.render.DeleteStatementProvider;
 import org.mybatis.dynamic.sql.insert.render.InsertStatementProvider;
@@ -15,6 +16,10 @@ import org.mybatis.dynamic.sql.update.UpdateDSLCompleter;
 import org.mybatis.dynamic.sql.update.render.UpdateStatementProvider;
 
 public interface MapperRootInterface<MO, ID> {
+    default BasicColumn[] getColumns() {
+        return new BasicColumn[] {};
+    }
+
     int insert(InsertStatementProvider<MO> insertStatement);
 
     int insertMultiple(MultiRowInsertStatementProvider<MO> multipleInsertStatement);
