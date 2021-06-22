@@ -82,8 +82,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         return getThisSvc().addMo(mo);
     }
 
-    @SuppressWarnings({ "unchecked", "static-access"
-    })
+    @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO addMo(final MO mo) {
@@ -102,12 +101,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
-        if (_mapper.selectList.length > 1) {
-            return getThisSvc().getById(mo.getId());
-        }
-        else {
-            return mo;
-        }
+        return getThisSvc().getById(mo.getId());
     }
 
     /**
