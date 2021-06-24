@@ -24,7 +24,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
-import rebue.wheel.core.exception.RuntimeExceptionX;
+import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
 
 /**
@@ -52,6 +52,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     protected MAPPER    _mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected DAO       _dao;
+
+    /**
+     * 克隆工具，已不推荐使用
+     * 简单、浅克隆推荐使用beanCopier，复杂、深度克隆推荐使用orika
+     */
+    @Deprecated
     @Autowired
     protected Mapper    _dozerMapper;
 
