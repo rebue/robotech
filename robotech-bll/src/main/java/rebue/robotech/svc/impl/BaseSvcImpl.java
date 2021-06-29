@@ -111,6 +111,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
         if (_mapper.getColumns().length > 1) {
+            // XXX 新添加的记录肯定不在缓存中，调用接口的getById方法不可能查到缓存，不用担心
             return getThisSvc().getById(mo.getId());
         }
         else {
