@@ -25,6 +25,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
+import rebue.wheel.api.OrikaUtils;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
 
@@ -86,7 +87,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO add(final ADD_TO to) {
-        final MO mo = _dozerMapper.map(to, getMoClass());
+        final MO mo = OrikaUtils.map(to, getMoClass());
         return getThisSvc().addMo(mo);
     }
 
@@ -128,7 +129,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO modifyById(final MODIFY_TO to) {
-        final MO mo = _dozerMapper.map(to, getMoClass());
+        final MO mo = OrikaUtils.map(to, getMoClass());
         return getThisSvc().modifyMoById(mo);
     }
 
@@ -175,7 +176,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
-        final MO mo = _dozerMapper.map(to, getMoClass());
+        final MO mo = OrikaUtils.map(to, getMoClass());
         return _mapper.deleteSelective(mo);
     }
 
@@ -186,7 +187,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getOne(final ONE_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
+        final MO mo = OrikaUtils.map(qo, getMoClass());
         return _mapper.selectOne(mo).orElse(null);
     }
 
@@ -227,7 +228,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Boolean existSelective(final ONE_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
+        final MO mo = OrikaUtils.map(qo, getMoClass());
         return _mapper.existSelective(mo);
     }
 
@@ -236,7 +237,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Long countSelective(final ONE_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
+        final MO mo = OrikaUtils.map(qo, getMoClass());
         return _mapper.countSelective(mo);
     }
 
@@ -249,7 +250,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> list(final LIST_TO qo) {
-        final MO mo = _dozerMapper.map(qo, getMoClass());
+        final MO mo = OrikaUtils.map(qo, getMoClass());
         return _mapper.selectSelective(mo);
     }
 
@@ -320,7 +321,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public PageInfo<MO> page(final PAGE_TO qo) {
-        final MO      mo     = _dozerMapper.map(qo, getMoClass());
+        final MO      mo     = OrikaUtils.map(qo, getMoClass());
         final ISelect select = () -> _mapper.selectSelective(mo);
         return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }
