@@ -55,10 +55,16 @@ public class Ro<T> implements Serializable {
      */
     private T                 extra;
 
+    public Ro(final ResultDic result, final String msg, final String detail) {
+        this.result = result;
+        this.msg    = msg;
+        this.detail = detail;
+    }
+
     public Ro(final ResultDic result, final String msg, final T extra) {
         this.result = result;
-        this.msg = msg;
-        this.extra = extra;
+        this.msg    = msg;
+        this.extra  = extra;
     }
 
 }
