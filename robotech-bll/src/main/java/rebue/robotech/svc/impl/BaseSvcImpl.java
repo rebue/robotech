@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +23,15 @@ import com.github.pagehelper.page.PageMethod;
 import com.google.common.base.CaseFormat;
 
 import lombok.extern.slf4j.Slf4j;
+import rebue.robotech.config.IdWorkerProperties;
+import rebue.robotech.config.IdWorkerProperties.Svc;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
-import rebue.wheel.api.OrikaUtils;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
+import rebue.wheel.core.util.OrikaUtils;
 
 /**
  * 服务实现层的父类
@@ -52,9 +56,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER    _mapper;
+    protected MAPPER           _mapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO       _dao;
+    protected DAO              _dao;
 
     /**
      * 克隆工具，已不推荐使用
@@ -62,15 +66,55 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Deprecated
     @Autowired
-    protected Mapper    _dozerMapper;
+    protected Mapper           _dozerMapper;
 
-    protected IdWorker3 _idWorker;
-    @Value("${robotech.appid:0}")
-    private int         _appid;
+    @Resource
+    private CuratorFramework   _zkClient;
+    @Resource
+    private IdWorkerProperties _idWorkerProperties;
+    /**
+     * ID生成器
+     */
+    protected IdWorker3        _idWorker;
 
     @PostConstruct
-    public void init() {
-        _idWorker = new IdWorker3(_appid);
+    public void init() throws Exception {
+        final String packageName       = this.getClass().getPackage().getName();
+        final String className         = this.getClass().getSimpleName();
+        final String reducePackageName = packageName.replaceAll(".svc.impl.ex", "").replaceAll(".svc.impl", "");
+        final String reduceClassName   = className.replaceAll("SvcImpl", "");
+        final String zkNodePath        = "/idworker/" + reducePackageName + "/" + reduceClassName;
+
+        // 从配置中读取节点ID的二进制的位数
+        int       nodeIdBits    = _idWorkerProperties.getNodeIdBits();
+        final Svc svcProperties = _idWorkerProperties.getSvces().get(reduceClassName);
+        if (svcProperties != null && svcProperties.getNodeIdBits() != null) {
+            nodeIdBits = svcProperties.getNodeIdBits();
+        }
+
+        Integer nodeId;
+        LOOP: while (true) {
+            final String zkNodeFullName   = _zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodePath + "/id_");
+            final String zkNodeSimpleName = zkNodeFullName.substring(zkNodeFullName.lastIndexOf("/") + 1);
+            nodeId = getNodeId(zkNodeFullName, nodeIdBits);
+            final List<String> zkNodes = _zkClient.getChildren().forPath(zkNodePath);
+            for (final String zkNodeSimpleNameTemp : zkNodes) {
+                if (zkNodeSimpleNameTemp.equals(zkNodeSimpleName)) {
+                    continue;
+                }
+                final Integer nodeIdTemp = getNodeId(zkNodeSimpleNameTemp, nodeIdBits);
+                if (nodeIdTemp.equals(nodeId)) {
+                    _zkClient.delete().forPath(zkNodeFullName);
+                    continue LOOP;
+                }
+            }
+            break;
+        }
+        _idWorker = new IdWorker3(nodeId, nodeIdBits);
+    }
+
+    private Integer getNodeId(final String path, final int nodeIdBits) {
+        return Integer.valueOf(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
     }
 
     protected abstract Class<MO> getMoClass();
