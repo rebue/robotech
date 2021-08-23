@@ -67,4 +67,14 @@ public class Ro<T> implements Serializable {
         this.extra  = extra;
     }
 
+    public static <T> Ro<T> success(T extra)
+    {
+        return new Ro<>(ResultDic.SUCCESS, "", extra);
+    }
+
+    public static <T> Ro<T> error(String msg)
+    {
+        return new Ro<>(ResultDic.FAIL, msg, null);
+    }
+
 }
