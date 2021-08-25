@@ -72,7 +72,7 @@ public class Ro<T> implements Serializable {
         return new Ro<>(ResultDic.SUCCESS, "", extra);
     }
 
-    public static <T> Ro<T> error(String msg)
+    public static <T> Ro<T> fail(String msg)
     {
         return new Ro<>(ResultDic.FAIL, msg, null);
     }
