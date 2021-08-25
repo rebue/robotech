@@ -67,6 +67,11 @@ public class Ro<T> implements Serializable {
         this.extra  = extra;
     }
 
+    public boolean isSuccess()
+    {
+        return ResultDic.SUCCESS.equals(result);
+    }
+
     public static <T> Ro<T> success(T extra)
     {
         return new Ro<>(ResultDic.SUCCESS, "", extra);
