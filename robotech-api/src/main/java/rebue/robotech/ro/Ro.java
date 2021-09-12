@@ -61,24 +61,28 @@ public class Ro<T> implements Serializable {
         this.detail = detail;
     }
 
+    public Ro(final ResultDic result, final String msg, final String detail, final String code) {
+        this.result = result;
+        this.msg    = msg;
+        this.detail = detail;
+        this.code   = code;
+    }
+
     public Ro(final ResultDic result, final String msg, final T extra) {
         this.result = result;
         this.msg    = msg;
         this.extra  = extra;
     }
 
-    public boolean isSuccess()
-    {
+    public boolean isSuccess() {
         return ResultDic.SUCCESS.equals(result);
     }
 
-    public static <T> Ro<T> success(T extra)
-    {
+    public static <T> Ro<T> success(final T extra) {
         return new Ro<>(ResultDic.SUCCESS, "", extra);
     }
 
-    public static <T> Ro<T> fail(String msg)
-    {
+    public static <T> Ro<T> fail(final String msg) {
         return new Ro<>(ResultDic.FAIL, msg, null);
     }
 
