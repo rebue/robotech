@@ -82,7 +82,7 @@ public abstract class EsBaseSvcImpl<SO extends So> implements EsBaseSvc<SO> {
             final GetRequest  req  = new GetRequest(getIndexName(), id);
             final GetResponse resp = esClient.get(req, RequestOptions.DEFAULT);
             log.info("ElasticSearch通过id获取document成功: index-{} id-{}", resp.getIndex(), resp.getId());
-            return (SO) PojoUtils.mapToPojo(resp.getSource(), GenericTypeUtils.getClassOfGeneric(this));
+            return (SO) PojoUtils.mapToPojo(resp.getSource(), GenericTypeUtils.getGenericClass(this));
         } catch (final IOException e) {
             final String msg = "ElasticSearch删除document失败";
             log.error(msg, e);
