@@ -29,6 +29,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
+import rebue.wheel.api.annotation.WriteDataSource;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
 import rebue.wheel.core.util.OrikaUtils;
@@ -53,7 +54,7 @@ import rebue.wheel.core.util.OrikaUtils;
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
-    implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER           _mapper;
@@ -138,6 +139,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @WriteDataSource
     public MO addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
@@ -180,6 +182,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @WriteDataSource
     public MO modifyMoById(final MO mo) {
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
