@@ -29,6 +29,11 @@ public interface Mo<ID> {
     default void setUpdateTimestamp(final Long updateTimestamp) {
     }
 
+    /**
+     * 获致ID数据类型(一般分为Long,String)
+     * 
+     * @return ID数据类型
+     */
     @JsonIgnore
     String getIdType();
 }

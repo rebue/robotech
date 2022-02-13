@@ -16,7 +16,7 @@ import rebue.robotech.to.PageTo;
 
 @Slf4j
 public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, SVC extends BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO>>
-        implements BaseApi<ID, ADD_TO, MODIFY_TO, PAGE_TO, MO> {
+        implements BaseApi<ID, ADD_TO, MODIFY_TO, ONE_TO, PAGE_TO, MO> {
     /**
      * 限制每页能查询的大小
      */
@@ -52,6 +52,21 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     }
 
+    /**
+     * 根据条件获取一条记录
+     *
+     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
+     */
+    @Override
+    public Ro<PojoRa<MO>> getOne(final ONE_TO qo) {
+        return new Ro<>(ResultDic.SUCCESS, "查询成功", new PojoRa<>(_svc.getOne(qo)));
+    }
+
+    /**
+     * 根据ID获取一条MyBatis Model对象的记录
+     *
+     * @param id 要获取对象的ID
+     */
     @Override
     public Ro<PojoRa<MO>> getById(final ID id) {
         return new Ro<>(ResultDic.SUCCESS, "查询成功", new PojoRa<>(_svc.getById(id)));
