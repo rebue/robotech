@@ -135,6 +135,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         return getThisSvc().addMo(mo);
     }
 
+    /**
+     *
+     */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -150,6 +153,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
                 mo.setId((ID) _idWorker.getId());
             }
         }
+        final Long now = System.currentTimeMillis();
+        mo.setCreateTimestamp(now);
+        mo.setUpdateTimestamp(now);
         final int rowCount = _mapper.insertSelective(mo);
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
@@ -181,6 +187,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO modifyMoById(final MO mo) {
+        final Long now = System.currentTimeMillis();
+        mo.setUpdateTimestamp(now);
         final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
