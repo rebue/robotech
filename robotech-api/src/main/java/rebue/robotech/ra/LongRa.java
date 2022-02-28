@@ -25,6 +25,6 @@ public class LongRa implements Serializable {
      * 返回Long的值
      */
     @NonNull
-    private Long value;
+    private Long              value;
 
 }

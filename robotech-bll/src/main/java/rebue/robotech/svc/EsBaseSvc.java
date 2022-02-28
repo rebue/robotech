@@ -22,11 +22,11 @@ public interface EsBaseSvc<SO> {
 
     SO getById(String id);
 
-//    List<SO> listAll();
-//
-//    Page<SO> list(Pageable pageable);
-//
-//    Page<SO> list(Integer pageNum, Integer pageSize);
-//
-//    boolean existById(String id);
+    // List<SO> listAll();
+    //
+    // Page<SO> list(Pageable pageable);
+    //
+    // Page<SO> list(Integer pageNum, Integer pageSize);
+    //
+    // boolean existById(String id);
 }

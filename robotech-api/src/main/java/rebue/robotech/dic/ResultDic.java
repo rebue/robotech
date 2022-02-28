@@ -18,22 +18,22 @@ public enum ResultDic implements Dic {
     /**
      * 1: 成功
      */
-    SUCCESS((byte) 1, "成功"),
+    SUCCESS(1, "成功"),
     /**
      * -1: 参数错误
      */
-    PARAM_ERROR((byte) -1, "参数错误"),
+    PARAM_ERROR(-1, "参数错误"),
     /**
      * -2: 失败(系统出现异常)
      */
-    FAIL((byte) -2, "失败"),
+    FAIL(-2, "失败"),
     /**
      * -3: 警告(用户操作错误)
      */
-    WARN((byte) -3, "警告");
+    WARN(-3, "警告");
 
-    private final byte   code;
-    private final String desc;
+    private final Integer code;
+    private final String  desc;
 
     @Override
     public String getName() {
@@ -54,7 +54,7 @@ public enum ResultDic implements Dic {
      * 否则Jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator // Jackson在反序列化时，调用 @JsonCreator 标注的构造器或者工厂方法来创建对象
-    public static ResultDic getItem(final byte pcode) {
+    public static ResultDic getItem(final Integer pcode) {
         final ResultDic result = (ResultDic) DicUtils.getItem(ResultDic.class, pcode);
         if (result == null) {
             throw new IllegalArgumentException("输入的code(" + pcode + ")不在枚举的取值范围内");

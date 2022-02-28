@@ -74,6 +74,11 @@ public class Ro<T> implements Serializable {
         this.extra  = extra;
     }
 
+    /**
+     * 判断是否成功
+     * 
+     * @return 是否成功
+     */
     public boolean isSuccess() {
         return ResultDic.SUCCESS.equals(result);
     }

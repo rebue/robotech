@@ -27,6 +27,7 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
      * @param i
      * @param parameter
      * @param jdbcType
+     * 
      * @throws SQLException
      */
     @Override
@@ -40,7 +41,9 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
      * 
      * @param rs
      * @param columnName
+     * 
      * @return
+     * 
      * @throws SQLException
      */
     @Override
@@ -54,7 +57,9 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
      * 
      * @param rs
      * @param columnIndex
+     * 
      * @return
+     * 
      * @throws SQLException
      */
     @Override
@@ -68,7 +73,9 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
      * 
      * @param cs
      * @param columnIndex
+     * 
      * @return
+     * 
      * @throws SQLException
      */
     @Override

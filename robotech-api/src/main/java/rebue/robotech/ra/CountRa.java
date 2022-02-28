@@ -1,13 +1,15 @@
 package rebue.robotech.ra;
 
+import java.io.Serializable;
+
+import org.springframework.lang.NonNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
-
-import java.io.Serializable;
 
 /**
  * 带有数量结果的附加内容
@@ -24,6 +26,6 @@ public class CountRa implements Serializable {
      * 返回数量
      */
     @NonNull
-    private Long count;
+    private Long              count;
 
 }

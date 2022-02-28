@@ -25,6 +25,6 @@ public class BooleanRa implements Serializable {
      * 返回Boolean的值
      */
     @NonNull
-    private Boolean value;
+    private Boolean           value;
 
 }

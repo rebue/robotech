@@ -20,11 +20,12 @@ import rebue.robotech.dic.Dic;
  * mybatis.configuration.default-enum-type-handler=rebue.robotech.mybatis.AutoEnumTypeHandler
  */
 public class AutoEnumTypeHandler<E extends Enum<E> & Dic> extends BaseTypeHandler<E> {
-    private final static Logger _log = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
+    private final static Logger _log        = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
 
-    private BaseTypeHandler<E> typeHandler = null;
+    private BaseTypeHandler<E>  typeHandler = null;
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes"
+    })
     public AutoEnumTypeHandler(final Class<E> type) {
         _log.info("构造mybatis自动处理枚举类型的转换类");
         if (type == null) {

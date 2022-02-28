@@ -12,29 +12,32 @@ import lombok.Getter;
  * 0: 未执行
  * 1: 已执行
  * 2: 暂停
+ * 
+ * @Deprecated
  */
 @AllArgsConstructor
 @Getter
+@Deprecated
 public enum TaskExecuteStateDic implements Dic {
     /**
      * -1: 取消
      */
-    CANCEL((byte) -1, "取消"),
+    CANCEL(-1, "取消"),
     /**
      * 0: 未执行
      */
-    NONE((byte) 0, "未执行"),
+    NONE(0, "未执行"),
     /**
      * 1: 已执行
      */
-    DONE((byte) 1, "已执行"),
+    DONE(1, "已执行"),
     /**
      * 2: 暂停
      */
-    SUSPEND((byte) 2, "暂停");
+    SUSPEND(2, "暂停");
 
-    private final byte   code;
-    private final String desc;
+    private final Integer code;
+    private final String  desc;
 
     @Override
     public String getName() {
@@ -55,7 +58,7 @@ public enum TaskExecuteStateDic implements Dic {
      * 否则Jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator // Jackson在反序列化时，调用 @JsonCreator 标注的构造器或者工厂方法来创建对象
-    public static TaskExecuteStateDic getItem(final byte pcode) {
+    public static TaskExecuteStateDic getItem(final Integer pcode) {
         final TaskExecuteStateDic result = (TaskExecuteStateDic) DicUtils.getItem(TaskExecuteStateDic.class, pcode);
         if (result == null) {
             throw new IllegalArgumentException("输入的code(" + pcode + ")不在枚举的取值范围内");

@@ -42,7 +42,7 @@ public class DicValidator implements ConstraintValidator<DicValid, Object> {
         }
 
         // 判断是否包含该值
-        return DicUtils.isValid(targetClass, Byte.valueOf(valueStr));
+        return DicUtils.isValid(targetClass, Integer.valueOf(valueStr));
     }
 
 }

@@ -25,6 +25,6 @@ public class StringRa implements Serializable {
      * 返回String的值
      */
     @NonNull
-    private String value;
+    private String            value;
 
 }
