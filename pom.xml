@@ -1,49 +1,51 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.github.rebue.common-pom</groupId>
-		<artifactId>common-pom</artifactId>
-		<version>1.2.5</version>
-	</parent>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.github.rebue.robotech</groupId>
-	<artifactId>robotech</artifactId>
-	<packaging>pom</packaging>
-	<description>后台服务层的经典封装</description>
+    <groupId>com.github.rebue.robotech</groupId>
+    <artifactId>robotech</artifactId>
+    <version>3.0.15</version>
+    <packaging>pom</packaging>
+    <description>后台服务层的经典封装</description>
 
-	<!-- 待聚合的模块 -->
-	<modules>
-		<module>robotech-api</module>
-		<module>robotech-bll</module>
-	</modules>
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.github.rebue.robotech</groupId>
-				<artifactId>robotech-api</artifactId>
-				<version>1.2.5</version>
-			</dependency>
+        <wheel.version>3.0.15</wheel.version>
+    </properties>
 
-			<dependency>
-				<groupId>com.github.rebue.robotech</groupId>
-				<artifactId>robotech-bll</artifactId>
-				<version>1.2.5</version>
-			</dependency>
+    <!-- 待聚合的模块 -->
+    <modules>
+        <module>robotech-api</module>
+        <module>robotech-bll</module>
+    </modules>
 
-			<dependency>
-				<groupId>com.github.rebue.wheel</groupId>
-				<artifactId>wheel-api</artifactId>
-				<version>1.2.5</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.rebue.wheel</groupId>
-				<artifactId>wheel-core</artifactId>
-				<version>1.2.5</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.rebue.robotech</groupId>
+                <artifactId>robotech-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.rebue.robotech</groupId>
+                <artifactId>robotech-bll</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.rebue.wheel</groupId>
+                <artifactId>wheel</artifactId>
+                <version>${wheel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
