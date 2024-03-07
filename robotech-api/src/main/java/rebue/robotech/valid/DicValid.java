@@ -6,8 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 /**
  * 字典校验注解
@@ -32,9 +32,9 @@ public @interface DicValid {
     String message();
 
     // 作用参考@Validated和@Valid的区别
-    // 没有此行会报错: javax.validation.ConstraintDefinitionException: HV000074: rebue.robotech.valid.DicValid contains Constraint annotation, but does not contain a groups parameter.
+    // 没有此行会报错: jakarta.validation.ConstraintDefinitionException: HV000074: rebue.robotech.valid.DicValid contains Constraint annotation, but does not contain a groups parameter.
     Class<?>[] groups() default {};
 
-    // 没有此行会报错: javax.validation.ConstraintDefinitionException: HV000074: rebue.robotech.valid.DicValid contains Constraint annotation, but does not contain a payload parameter.
+    // 没有此行会报错: jakarta.validation.ConstraintDefinitionException: HV000074: rebue.robotech.valid.DicValid contains Constraint annotation, but does not contain a payload parameter.
     Class<? extends Payload>[] payload() default {};
 }

@@ -2,7 +2,7 @@ package rebue.robotech.to;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Positive;
+import jakarta.validation.constraints.Positive;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,13 +1,12 @@
 package rebue.robotech.svc.impl;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
+import com.google.common.base.CaseFormat;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
@@ -15,14 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.github.dozermapper.core.Mapper;
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.page.PageMethod;
-import com.google.common.base.CaseFormat;
-
-import lombok.extern.slf4j.Slf4j;
+import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.config.IdWorkerProperties;
 import rebue.robotech.config.IdWorkerProperties.Svc;
 import rebue.robotech.mo.Mo;
@@ -31,7 +23,11 @@ import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
-import rebue.wheel.core.util.OrikaUtils;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 服务实现层的父类
@@ -52,30 +48,24 @@ import rebue.wheel.core.util.OrikaUtils;
  */
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>>
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER           _mapper;
+    protected CLONE_MAPPER _cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO              _dao;
-
-    /**
-     * 克隆工具，已不推荐使用
-     * 简单、浅克隆推荐使用beanCopier，复杂、深度克隆推荐使用orika
-     */
-    @Deprecated
-    @Autowired
-    protected Mapper           _dozerMapper;
+    protected MAPPER       _mapper;
+    @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
+    protected DAO          _dao;
 
     @Resource
-    private CuratorFramework   _zkClient;
+    private   CuratorFramework   _zkClient;
     @Resource
-    private IdWorkerProperties _idWorkerProperties;
+    private   IdWorkerProperties _idWorkerProperties;
     /**
      * ID生成器
      */
-    protected IdWorker3        _idWorker;
+    protected IdWorker3          _idWorker;
 
     @PostConstruct
     public void init() throws Exception {
@@ -93,7 +83,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         }
 
         Integer nodeId;
-        LOOP: while (true) {
+        LOOP:
+        while (true) {
             final String zkNodeFullName   = _zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodePath + "/id_");
             final String zkNodeSimpleName = zkNodeFullName.substring(zkNodeFullName.lastIndexOf("/") + 1);
             nodeId = getNodeId(zkNodeFullName, nodeIdBits);
@@ -125,13 +116,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 添加记录
      *
      * @param to 添加的参数
-     *
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO add(final ADD_TO to) {
-        final MO mo = OrikaUtils.map(to, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().addToMapMo(to);
         return getThisSvc().addMo(mo);
     }
 
@@ -146,8 +136,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
             }
-        }
-        else if (mo.getIdType().equals("Long")) {
+        } else if (mo.getIdType().equals("Long")) {
             // 如果id为空那么自动生成分布式id
             if (mo.getId() == null || (Long) mo.getId() == 0) {
                 mo.setId((ID) _idWorker.getId());
@@ -163,8 +152,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (_mapper.getColumns().length > 1) {
             // XXX 新添加的记录肯定不在缓存中，调用接口的getById方法不可能查到缓存，不用担心
             return getThisSvc().getById(mo.getId());
-        }
-        else {
+        } else {
             log.info("该表只有一个字段，Mapper没有生成selectByPrimaryKey的方法，直接返回id的Mo");
             return mo;
         }
@@ -174,13 +162,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过ID修改记录内容
      *
      * @param to 修改的参数，必须包含ID
-     *
      * @return 如果成功，且仅修改一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO modifyById(final MODIFY_TO to) {
-        final MO mo = OrikaUtils.map(to, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().modifyToMapMo(to);
         return getThisSvc().modifyMoById(mo);
     }
 
@@ -204,7 +191,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过ID删除记录
      *
      * @param id 要删除记录的ID
-     *
      * @return 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
@@ -223,13 +209,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 通过条件删除记录
      *
      * @param to 要删除记录需要符合的条件
-     *
      * @return 返回删除的记录数
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
-        final MO mo = OrikaUtils.map(to, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().delToMapMo(to);
         return _mapper.deleteSelective(mo);
     }
 
@@ -240,7 +225,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getOne(final ONE_TO qo) {
-        final MO mo = OrikaUtils.map(qo, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
         return _mapper.selectOne(mo).orElse(null);
     }
 
@@ -248,7 +233,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 根据ID获取一条MyBatis Model对象的记录
      *
      * @param id 要获取对象的ID
-     *
      * @return MyBatis Model对象，如果查找不到则返回null
      */
     @Override
@@ -260,7 +244,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 根据ID获取一条JPA对象的记录
      *
      * @param id 要获取对象的ID
-     *
      * @return JPA对象，如果查找不到则返回null
      */
     @Override
@@ -281,7 +264,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Boolean existSelective(final ONE_TO qo) {
-        final MO mo = OrikaUtils.map(qo, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
         return _mapper.existSelective(mo);
     }
 
@@ -290,7 +273,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Long countSelective(final ONE_TO qo) {
-        final MO mo = OrikaUtils.map(qo, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
         return _mapper.countSelective(mo);
     }
 
@@ -298,12 +281,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 条件查询
      *
      * @param qo 查询条件
-     *
      * @return 查询列表
      */
     @Override
     public List<MO> list(final LIST_TO qo) {
-        final MO mo = OrikaUtils.map(qo, getMoClass());
+        final MO mo = (MO) _cloneMapper.getInstance().listToMapMo(qo);
         return _mapper.selectSelective(mo);
     }
 
@@ -311,7 +293,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 根据ID列表查询
      *
      * @param ids ID列表
-     *
      * @return 查询列表
      */
     @Override
@@ -346,15 +327,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @param pageNum  页码
      * @param pageSize 每页大小
      * @param orderBy  排序字段
-     *
      * @return 查询到的分页信息
      */
     @Override
     public PageInfo<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
         if (StringUtils.isBlank(orderBy)) {
             return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
-        }
-        else {
+        } else {
             // 将orderBy由小驼峰格式转化为数据库规范的大写下划线格式
             final String newOrderBy = Stream.of(orderBy.split(",")).map(item -> {
                 final String[] split = item.trim().split(" ");
@@ -369,12 +348,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * 分页查询列表
      *
      * @param qo 查询条件
-     *
      * @return 查询到的分页信息
      */
     @Override
     public PageInfo<MO> page(final PAGE_TO qo) {
-        final MO      mo     = OrikaUtils.map(qo, getMoClass());
+        final MO      mo     = (MO) _cloneMapper.getInstance().pageToMapMo(qo);
         final ISelect select = () -> _mapper.selectSelective(mo);
         return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }

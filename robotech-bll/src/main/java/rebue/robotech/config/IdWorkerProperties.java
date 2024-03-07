@@ -21,7 +21,7 @@ public class IdWorkerProperties {
     Map<String, Svc> svces      = new LinkedHashMap<>();
 
     @Data
-    public class Svc {
+    public static class Svc {
         /**
          * 节点ID二进制的位数
          */
