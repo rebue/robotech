@@ -1,8 +1,6 @@
 package rebue.robotech.clone;
 
 public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
-    CloneMapper getInstance();
-
     MO addToMapMo(ADD_TO to);
 
     MO modifyToMapMo(MODIFY_TO to);

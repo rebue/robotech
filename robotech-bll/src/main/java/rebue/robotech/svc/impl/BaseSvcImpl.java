@@ -121,7 +121,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO add(final ADD_TO to) {
-        final MO mo = (MO) _cloneMapper.getInstance().addToMapMo(to);
+        final MO mo = _cloneMapper.addToMapMo(to);
         return getThisSvc().addMo(mo);
     }
 
@@ -167,7 +167,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO modifyById(final MODIFY_TO to) {
-        final MO mo = (MO) _cloneMapper.getInstance().modifyToMapMo(to);
+        final MO mo = _cloneMapper.modifyToMapMo(to);
         return getThisSvc().modifyMoById(mo);
     }
 
@@ -214,7 +214,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
-        final MO mo = (MO) _cloneMapper.getInstance().delToMapMo(to);
+        final MO mo = _cloneMapper.delToMapMo(to);
         return _mapper.deleteSelective(mo);
     }
 
@@ -225,7 +225,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getOne(final ONE_TO qo) {
-        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
+        final MO mo = _cloneMapper.oneToMapMo(qo);
         return _mapper.selectOne(mo).orElse(null);
     }
 
@@ -264,7 +264,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Boolean existSelective(final ONE_TO qo) {
-        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
+        final MO mo = _cloneMapper.oneToMapMo(qo);
         return _mapper.existSelective(mo);
     }
 
@@ -273,7 +273,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Long countSelective(final ONE_TO qo) {
-        final MO mo = (MO) _cloneMapper.getInstance().oneToMapMo(qo);
+        final MO mo = _cloneMapper.oneToMapMo(qo);
         return _mapper.countSelective(mo);
     }
 
@@ -285,7 +285,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> list(final LIST_TO qo) {
-        final MO mo = (MO) _cloneMapper.getInstance().listToMapMo(qo);
+        final MO mo = _cloneMapper.listToMapMo(qo);
         return _mapper.selectSelective(mo);
     }
 
@@ -352,7 +352,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public PageInfo<MO> page(final PAGE_TO qo) {
-        final MO      mo     = (MO) _cloneMapper.getInstance().pageToMapMo(qo);
+        final MO      mo     = _cloneMapper.pageToMapMo(qo);
         final ISelect select = () -> _mapper.selectSelective(mo);
         return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }
