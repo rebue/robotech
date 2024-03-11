@@ -1,17 +1,14 @@
 package rebue.robotech.svc;
 
-import java.util.List;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
-import org.springframework.validation.annotation.Validated;
-
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
-
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.to.PageTo;
+
+import java.util.List;
 
 /**
  * 基础服务层接口
@@ -25,8 +22,6 @@ import rebue.robotech.to.PageTo;
  *    如果方法的返回值为void，在方法上方加上 @Valid 注解会出现异常，报HV000132错误
  * </pre>
  *
- * @author zbz
- *
  * @param <ID>        ID的类型
  * @param <ADD_TO>    添加参数的类型
  * @param <MODIFY_TO> 修改参数的类型
@@ -36,7 +31,7 @@ import rebue.robotech.to.PageTo;
  * @param <PAGE_TO>   分页参数的类型
  * @param <MO>        Mybatis模型对象的类型
  * @param <JO>        JPA实体对象的类型
- *
+ * @author zbz
  */
 @Validated
 public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO> {
@@ -44,7 +39,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 添加记录
      *
      * @param to 添加的参数
-     *
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
     MO add(@Valid ADD_TO to);
@@ -53,7 +47,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 添加记录
      *
      * @param mo 添加的参数
-     *
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
     MO addMo(@Valid MO mo);
@@ -62,7 +55,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 通过ID修改记录内容
      *
      * @param to 修改的参数，必须包含ID
-     *
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     MO modifyById(@Valid MODIFY_TO to);
@@ -71,7 +63,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 通过ID修改记录内容
      *
      * @param mo 修改的参数，必须包含ID
-     *
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     MO modifyMoById(@Valid MO mo);
@@ -80,7 +71,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 通过ID删除记录
      *
      * @param id 要删除记录的ID
-     *
      * @return 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      */
     void delById(@NotNull ID id);
@@ -89,7 +79,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 通过条件删除记录
      *
      * @param to 要删除记录需要符合的条件
-     *
      * @return 返回删除的记录数
      */
     Integer delSelective(@Valid DEL_TO to);
@@ -105,7 +94,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 根据ID获取一条MyBatis Model对象的记录
      *
      * @param id 要获取对象的ID
-     *
      * @return MyBatis Model对象，如果查找不到则返回null
      */
     MO getById(@NotNull ID id);
@@ -114,7 +102,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 根据ID获取一条JPA对象的记录
      *
      * @param id 要获取对象的ID
-     *
      * @return JPA对象，如果查找不到则返回null
      */
     JO getJoById(@NotNull ID id);
@@ -138,7 +125,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 条件查询
      *
      * @param qo 查询条件
-     *
      * @return 查询列表
      */
     List<MO> list(@Valid final LIST_TO qo);
@@ -147,7 +133,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 根据ID列表查询
      *
      * @param ids ID列表
-     *
      * @return 查询列表
      */
     List<MO> listIn(final List<ID> ids);
@@ -173,7 +158,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param pageNum  页码
      * @param pageSize 每页大小
      * @param orderBy  排序字段
-     *
      * @return 查询到的分页信息
      */
     PageInfo<MO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
@@ -182,7 +166,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 分页查询列表
      *
      * @param qo 查询条件
-     *
      * @return 查询到的分页信息
      */
     PageInfo<MO> page(@Valid PAGE_TO qo);

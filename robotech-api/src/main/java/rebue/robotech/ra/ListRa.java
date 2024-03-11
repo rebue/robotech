@@ -1,16 +1,14 @@
 package rebue.robotech.ra;
 
-import java.io.Serializable;
-import java.util.List;
-
-import org.springframework.lang.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 带有List的附加内容
@@ -29,6 +27,6 @@ public class ListRa<POJO> implements Serializable {
      * 返回POJO列表
      */
     @NonNull
-    private List<POJO>        list;
+    private List<POJO> list;
 
 }

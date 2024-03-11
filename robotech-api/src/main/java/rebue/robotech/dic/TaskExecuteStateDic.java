@@ -1,18 +1,17 @@
 package rebue.robotech.dic;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
  * 任务执行状态的字典
- * 
+ * <p>
  * -1: 取消
  * 0: 未执行
  * 1: 已执行
  * 2: 暂停
- * 
+ *
  * @Deprecated
  */
 @AllArgsConstructor

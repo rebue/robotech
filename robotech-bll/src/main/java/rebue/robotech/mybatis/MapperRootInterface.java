@@ -1,9 +1,5 @@
 package rebue.robotech.mybatis;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
 import org.mybatis.dynamic.sql.BasicColumn;
 import org.mybatis.dynamic.sql.delete.DeleteDSLCompleter;
 import org.mybatis.dynamic.sql.delete.render.DeleteStatementProvider;
@@ -15,9 +11,13 @@ import org.mybatis.dynamic.sql.select.render.SelectStatementProvider;
 import org.mybatis.dynamic.sql.update.UpdateDSLCompleter;
 import org.mybatis.dynamic.sql.update.render.UpdateStatementProvider;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 public interface MapperRootInterface<MO, ID> {
     default BasicColumn[] getColumns() {
-        return new BasicColumn[] {};
+        return new BasicColumn[]{};
     }
 
     int insert(InsertStatementProvider<MO> insertStatement);

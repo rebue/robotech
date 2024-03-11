@@ -1,16 +1,14 @@
 package rebue.robotech.ra;
 
-import java.io.Serializable;
-
-import org.springframework.lang.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.github.pagehelper.PageInfo;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
 
 /**
  * 带有分页信息的附加内容
@@ -27,6 +25,6 @@ public class PageRa<T> implements Serializable {
      * 返回分页信息
      */
     @NonNull
-    private PageInfo<T>       page;
+    private PageInfo<T> page;
 
 }

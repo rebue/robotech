@@ -1,14 +1,13 @@
 package rebue.robotech.mybatis;
 
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+import rebue.robotech.dic.Dic;
+
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.apache.ibatis.type.BaseTypeHandler;
-import org.apache.ibatis.type.JdbcType;
-
-import rebue.robotech.dic.Dic;
 
 public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Dic> {
     private final Class<E> type;
@@ -22,29 +21,15 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
 
     /**
      * 用于定义设置参数时，该如何把Java类型的参数转换为对应的数据库类型
-     * 
-     * @param ps
-     * @param i
-     * @param parameter
-     * @param jdbcType
-     * 
-     * @throws SQLException
      */
     @Override
     public void setNonNullParameter(final PreparedStatement ps, final int i, final Dic parameter,
-            final JdbcType jdbcType) throws SQLException {
+                                    final JdbcType jdbcType) throws SQLException {
         ps.setInt(i, parameter.getCode());
     }
 
     /**
      * 用于定义通过字段名称获取字段数据时，如何把数据库类型转换为对应的Java类型
-     * 
-     * @param rs
-     * @param columnName
-     * 
-     * @return
-     * 
-     * @throws SQLException
      */
     @Override
     public Dic getNullableResult(final ResultSet rs, final String columnName) throws SQLException {
@@ -54,13 +39,6 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
 
     /**
      * 用于定义通过字段索引获取字段数据时，如何把数据库类型转换为对应的Java类型
-     * 
-     * @param rs
-     * @param columnIndex
-     * 
-     * @return
-     * 
-     * @throws SQLException
      */
     @Override
     public Dic getNullableResult(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -70,13 +48,6 @@ public class EnumTypeHandler<E extends Enum<?> & Dic> extends BaseTypeHandler<Di
 
     /**
      * 用于定义调用存储过程后，如何把数据库类型转换为对应的Java类型
-     * 
-     * @param cs
-     * @param columnIndex
-     * 
-     * @return
-     * 
-     * @throws SQLException
      */
     @Override
     public Dic getNullableResult(final CallableStatement cs, final int columnIndex) throws SQLException {

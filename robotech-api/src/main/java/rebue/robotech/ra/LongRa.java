@@ -1,15 +1,13 @@
 package rebue.robotech.ra;
 
-import java.io.Serializable;
-
-import org.springframework.lang.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
 
 /**
  * 带有Long结果的附加内容
@@ -25,6 +23,6 @@ public class LongRa implements Serializable {
      * 返回Long的值
      */
     @NonNull
-    private Long              value;
+    private Long value;
 
 }

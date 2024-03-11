@@ -1,16 +1,15 @@
 package rebue.robotech.mybatis;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import rebue.robotech.dic.Dic;
+
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * mybatis自动处理枚举类型的转换
@@ -20,11 +19,11 @@ import rebue.robotech.dic.Dic;
  * mybatis.configuration.default-enum-type-handler=rebue.robotech.mybatis.AutoEnumTypeHandler
  */
 public class AutoEnumTypeHandler<E extends Enum<E> & Dic> extends BaseTypeHandler<E> {
-    private final static Logger _log        = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
+    private final static Logger _log = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
 
-    private BaseTypeHandler<E>  typeHandler = null;
+    private BaseTypeHandler<E> typeHandler = null;
 
-    @SuppressWarnings({ "unchecked", "rawtypes"
+    @SuppressWarnings({"unchecked", "rawtypes"
     })
     public AutoEnumTypeHandler(final Class<E> type) {
         _log.info("构造mybatis自动处理枚举类型的转换类");

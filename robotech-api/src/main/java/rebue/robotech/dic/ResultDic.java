@@ -1,7 +1,6 @@
 package rebue.robotech.dic;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

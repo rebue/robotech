@@ -5,7 +5,7 @@
 在spring boot启用
 
 1. 依赖mybatis-spring-boot-starter
-2. Spring Boot的配置文件配置如下： 
+2. Spring Boot的配置文件配置如下：
 
 ```yaml
 mybatis:

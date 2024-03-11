@@ -1,15 +1,13 @@
 package rebue.robotech.ra;
 
-import java.io.Serializable;
-
-import org.springframework.lang.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
 
 /**
  * 带有ID的附加内容 主要给添加方法返回生成后的ID
@@ -27,6 +25,6 @@ public class IdRa<T> implements Serializable {
      * 返回系统生成的ID
      */
     @NonNull
-    private T                 id;
+    private T id;
 
 }
