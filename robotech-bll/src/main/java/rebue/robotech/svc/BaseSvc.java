@@ -30,11 +30,10 @@ import java.util.List;
  * @param <LIST_TO>   列表参数的类型
  * @param <PAGE_TO>   分页参数的类型
  * @param <MO>        Mybatis模型对象的类型
- * @param <JO>        JPA实体对象的类型
  * @author zbz
  */
 @Validated
-public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO> {
+public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>> {
     /**
      * 添加记录
      *
@@ -69,9 +68,9 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
 
     /**
      * 通过ID删除记录
+     * 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      *
      * @param id 要删除记录的ID
-     * @return 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      */
     void delById(@NotNull ID id);
 
@@ -97,14 +96,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @return MyBatis Model对象，如果查找不到则返回null
      */
     MO getById(@NotNull ID id);
-
-    /**
-     * 根据ID获取一条JPA对象的记录
-     *
-     * @param id 要获取对象的ID
-     * @return JPA对象，如果查找不到则返回null
-     */
-    JO getJoById(@NotNull ID id);
 
     /**
      * 判断指定ID的记录是否存在
@@ -143,13 +134,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @return 查询列表
      */
     List<MO> listAll();
-
-    /**
-     * 查询JPA对象列表
-     *
-     * @return 查询JPA对象列表
-     */
-    List<JO> listJoAll();
 
     /**
      * 分页查询列表

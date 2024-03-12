@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
@@ -48,15 +47,13 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, JO, MAPPER extends MapperRootInterface<MO, ID>, DAO extends JpaRepository<JO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO>>
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected CLONE_MAPPER _cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER       _mapper;
-    @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected DAO          _dao;
 
     @Resource
     private   CuratorFramework   _zkClient;
@@ -105,12 +102,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     private Integer getNodeId(final String path, final int nodeIdBits) {
-        return Integer.valueOf(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
+        return Integer.parseInt(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
     }
 
     protected abstract Class<MO> getMoClass();
 
-    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, JO> getThisSvc();
+    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
 
     /**
      * 添加记录
@@ -241,17 +238,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     /**
-     * 根据ID获取一条JPA对象的记录
-     *
-     * @param id 要获取对象的ID
-     * @return JPA对象，如果查找不到则返回null
-     */
-    @Override
-    public JO getJoById(final ID id) {
-        return _dao.findById(id).orElse(null);
-    }
-
-    /**
      * 判断指定ID的记录是否存在
      */
     @Override
@@ -308,16 +294,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public List<MO> listAll() {
         return _mapper.select(c -> c);
-    }
-
-    /**
-     * 查询JPA对象列表
-     *
-     * @return 查询JPA对象列表
-     */
-    @Override
-    public List<JO> listJoAll() {
-        return _dao.findAll();
     }
 
     /**
