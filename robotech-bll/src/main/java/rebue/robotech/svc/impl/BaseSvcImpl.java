@@ -4,18 +4,13 @@ import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
 import com.google.common.base.CaseFormat;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
-import rebue.robotech.config.IdWorkerProperties;
-import rebue.robotech.config.IdWorkerProperties.Svc;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
@@ -53,57 +48,58 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected CLONE_MAPPER _cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER       _mapper;
+    protected MAPPER       _mybatisMapper;
 
-    @Resource
-    private   CuratorFramework   _zkClient;
-    @Resource
-    private   IdWorkerProperties _idWorkerProperties;
+//    @Resource
+//    private   CuratorFramework   _zkClient;
+//    @Resource
+//    private   IdWorkerProperties _idWorkerProperties;
     /**
      * ID生成器
      */
-    protected IdWorker3          _idWorker;
+    @Resource
+    protected IdWorker3 _idWorker;
 
-    @PostConstruct
-    public void init() throws Exception {
-        final String packageName       = this.getClass().getPackage().getName();
-        final String className         = this.getClass().getSimpleName();
-        final String reducePackageName = packageName.replaceAll(".svc.impl.ex", "").replaceAll(".svc.impl", "");
-        final String reduceClassName   = className.replaceAll("SvcImpl", "");
-        final String zkNodePath        = "/idworker/" + reducePackageName + "/" + reduceClassName;
+//    @PostConstruct
+//    public void init() throws Exception {
+//        final String packageName       = this.getClass().getPackage().getName();
+//        final String className         = this.getClass().getSimpleName();
+//        final String reducePackageName = packageName.replaceAll(".svc.impl.ex", "").replaceAll(".svc.impl", "");
+//        final String reduceClassName   = className.replaceAll("SvcImpl", "");
+//        final String zkNodePath        = "/idworker/" + reducePackageName + "/" + reduceClassName;
+//
+//        // 从配置中读取节点ID的二进制的位数
+//        int       nodeIdBits    = _idWorkerProperties.getNodeIdBits();
+//        final Svc svcProperties = _idWorkerProperties.getSvces().get(reduceClassName);
+//        if (svcProperties != null && svcProperties.getNodeIdBits() != null) {
+//            nodeIdBits = svcProperties.getNodeIdBits();
+//        }
+//
+//        Integer nodeId;
+//        LOOP:
+//        while (true) {
+//            final String zkNodeFullName   = _zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodePath + "/id_");
+//            final String zkNodeSimpleName = zkNodeFullName.substring(zkNodeFullName.lastIndexOf("/") + 1);
+//            nodeId = getNodeId(zkNodeFullName, nodeIdBits);
+//            final List<String> zkNodes = _zkClient.getChildren().forPath(zkNodePath);
+//            for (final String zkNodeSimpleNameTemp : zkNodes) {
+//                if (zkNodeSimpleNameTemp.equals(zkNodeSimpleName)) {
+//                    continue;
+//                }
+//                final Integer nodeIdTemp = getNodeId(zkNodeSimpleNameTemp, nodeIdBits);
+//                if (nodeIdTemp.equals(nodeId)) {
+//                    _zkClient.delete().forPath(zkNodeFullName);
+//                    continue LOOP;
+//                }
+//            }
+//            break;
+//        }
+//        _idWorker = new IdWorker3(nodeId, nodeIdBits);
+//    }
 
-        // 从配置中读取节点ID的二进制的位数
-        int       nodeIdBits    = _idWorkerProperties.getNodeIdBits();
-        final Svc svcProperties = _idWorkerProperties.getSvces().get(reduceClassName);
-        if (svcProperties != null && svcProperties.getNodeIdBits() != null) {
-            nodeIdBits = svcProperties.getNodeIdBits();
-        }
-
-        Integer nodeId;
-        LOOP:
-        while (true) {
-            final String zkNodeFullName   = _zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodePath + "/id_");
-            final String zkNodeSimpleName = zkNodeFullName.substring(zkNodeFullName.lastIndexOf("/") + 1);
-            nodeId = getNodeId(zkNodeFullName, nodeIdBits);
-            final List<String> zkNodes = _zkClient.getChildren().forPath(zkNodePath);
-            for (final String zkNodeSimpleNameTemp : zkNodes) {
-                if (zkNodeSimpleNameTemp.equals(zkNodeSimpleName)) {
-                    continue;
-                }
-                final Integer nodeIdTemp = getNodeId(zkNodeSimpleNameTemp, nodeIdBits);
-                if (nodeIdTemp.equals(nodeId)) {
-                    _zkClient.delete().forPath(zkNodeFullName);
-                    continue LOOP;
-                }
-            }
-            break;
-        }
-        _idWorker = new IdWorker3(nodeId, nodeIdBits);
-    }
-
-    private Integer getNodeId(final String path, final int nodeIdBits) {
-        return Integer.parseInt(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
-    }
+//    private Integer getNodeId(final String path, final int nodeIdBits) {
+//        return Integer.parseInt(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
+//    }
 
     protected abstract Class<MO> getMoClass();
 
@@ -142,11 +138,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         final Long now = System.currentTimeMillis();
         mo.setCreateTimestamp(now);
         mo.setUpdateTimestamp(now);
-        final int rowCount = _mapper.insertSelective(mo);
+        final int rowCount = _mybatisMapper.insertSelective(mo);
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
-        if (_mapper.getColumns().length > 1) {
+        if (_mybatisMapper.getColumns().length > 1) {
             // XXX 新添加的记录肯定不在缓存中，调用接口的getById方法不可能查到缓存，不用担心
             return getThisSvc().getById(mo.getId());
         } else {
@@ -173,7 +169,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public MO modifyMoById(final MO mo) {
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
-        final int rowCount = _mapper.updateByPrimaryKeySelective(mo);
+        final int rowCount = _mybatisMapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
         }
@@ -193,7 +189,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void delById(final ID id) {
-        final int rowCount = _mapper.deleteByPrimaryKey(id);
+        final int rowCount = _mybatisMapper.deleteByPrimaryKey(id);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
         }
@@ -212,7 +208,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
         final MO mo = _cloneMapper.delToMapMo(to);
-        return _mapper.deleteSelective(mo);
+        return _mybatisMapper.deleteSelective(mo);
     }
 
     /**
@@ -223,7 +219,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public MO getOne(final ONE_TO qo) {
         final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mapper.selectOne(mo).orElse(null);
+        return _mybatisMapper.selectOne(mo).orElse(null);
     }
 
     /**
@@ -234,7 +230,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getById(final ID id) {
-        return _mapper.selectByPrimaryKey(id).orElse(null);
+        return _mybatisMapper.selectByPrimaryKey(id).orElse(null);
     }
 
     /**
@@ -242,7 +238,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public Boolean existById(final ID id) {
-        return _mapper.existByPrimaryKey(id);
+        return _mybatisMapper.existByPrimaryKey(id);
     }
 
     /**
@@ -251,7 +247,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public Boolean existSelective(final ONE_TO qo) {
         final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mapper.existSelective(mo);
+        return _mybatisMapper.existSelective(mo);
     }
 
     /**
@@ -260,7 +256,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public Long countSelective(final ONE_TO qo) {
         final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mapper.countSelective(mo);
+        return _mybatisMapper.countSelective(mo);
     }
 
     /**
@@ -272,7 +268,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public List<MO> list(final LIST_TO qo) {
         final MO mo = _cloneMapper.listToMapMo(qo);
-        return _mapper.selectSelective(mo);
+        return _mybatisMapper.selectSelective(mo);
     }
 
     /**
@@ -283,7 +279,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> listIn(final List<ID> ids) {
-        return _mapper.selectIn(ids);
+        return _mybatisMapper.selectIn(ids);
     }
 
     /**
@@ -293,7 +289,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> listAll() {
-        return _mapper.select(c -> c);
+        return _mybatisMapper.select(c -> c);
     }
 
     /**
@@ -329,7 +325,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public PageInfo<MO> page(final PAGE_TO qo) {
         final MO      mo     = _cloneMapper.pageToMapMo(qo);
-        final ISelect select = () -> _mapper.selectSelective(mo);
+        final ISelect select = () -> _mybatisMapper.selectSelective(mo);
         return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
     }
 
