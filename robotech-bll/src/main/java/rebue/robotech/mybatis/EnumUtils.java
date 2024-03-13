@@ -1,6 +1,6 @@
 package rebue.robotech.mybatis;
 
-import rebue.robotech.dic.Dic;
+import rebue.wheel.api.dic.Dic;
 
 public class EnumUtils {
     public static <E extends Enum<?> & Dic> E codeOf(final Class<E> enumClass, final int code) {

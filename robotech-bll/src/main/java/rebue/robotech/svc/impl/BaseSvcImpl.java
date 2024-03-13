@@ -4,10 +4,13 @@ import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.page.PageMethod;
 import com.google.common.base.CaseFormat;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
@@ -17,6 +20,7 @@ import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.core.idworker.IdWorker3;
+import rebue.wheel.core.idworker.IdWorkerUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,15 +54,31 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER       _mybatisMapper;
 
-//    @Resource
-//    private   CuratorFramework   _zkClient;
+    @Resource
+    private CuratorFramework _zkClient;
 //    @Resource
 //    private   IdWorkerProperties _idWorkerProperties;
+
+    /**
+     * 配置idworker参数
+     * 如果以"nodeId:"开头，且值为0~31，则是指定nodeId;
+     * 如果以"auto"开头，则由zookeeper自动分配nodeId，nodeIdBits默认为5
+     * 如果以"auto:"开头，则由zookeeper自动分配nodeId，"auto:"后面跟nodeIdBits的值
+     * 如果不设置，则不使用zookeeper来计算id(仅用于开发或单机模式中)
+     */
+    @Value("${rebue.idworker}")
+    private String idworker;
+
     /**
      * ID生成器
      */
-    @Resource
-    protected IdWorker3 _idWorker;
+//    @Resource
+    private IdWorker3 _idWorker;
+
+    @PostConstruct
+    public void init() throws Exception {
+        _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
+    }
 
 //    @PostConstruct
 //    public void init() throws Exception {
@@ -95,10 +115,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 //            break;
 //        }
 //        _idWorker = new IdWorker3(nodeId, nodeIdBits);
-//    }
-
-//    private Integer getNodeId(final String path, final int nodeIdBits) {
-//        return Integer.parseInt(StringUtils.right(path, 10)) % (2 << nodeIdBits - 1);
 //    }
 
     protected abstract Class<MO> getMoClass();

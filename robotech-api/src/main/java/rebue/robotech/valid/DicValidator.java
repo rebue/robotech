@@ -3,8 +3,8 @@ package rebue.robotech.valid;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
-import rebue.robotech.dic.Dic;
-import rebue.robotech.dic.DicUtils;
+import rebue.wheel.api.dic.Dic;
+import rebue.wheel.api.dic.DicUtils;
 
 public class DicValidator implements ConstraintValidator<DicValid, Object> {
     // 枚举校验注解

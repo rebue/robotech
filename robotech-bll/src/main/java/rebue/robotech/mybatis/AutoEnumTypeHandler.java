@@ -4,7 +4,7 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rebue.robotech.dic.Dic;
+import rebue.wheel.api.dic.Dic;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
