@@ -1,14 +1,15 @@
 package rebue.robotech.svc.impl;
 
 import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.page.PageMethod;
 import com.google.common.base.CaseFormat;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
+import org.mybatis.dynamic.sql.exception.NonRenderingWhereClauseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Propagation;
@@ -223,8 +224,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
-        final MO mo = _cloneMapper.delToMapMo(to);
-        return _mybatisMapper.deleteSelective(mo);
+        try {
+            final MO mo = _cloneMapper.delToMapMo(to);
+            return _mybatisMapper.deleteSelective(mo);
+        } catch (NonRenderingWhereClauseException e) {
+            throw new RuntimeExceptionX("不能执行不带条件的删除操作");
+        }
     }
 
     /**
@@ -320,7 +325,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     public PageInfo<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
         if (StringUtils.isBlank(orderBy)) {
-            return PageMethod.startPage(pageNum, pageSize).doSelectPageInfo(select);
+            return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
         } else {
             // 将orderBy由小驼峰格式转化为数据库规范的大写下划线格式
             final String newOrderBy = Stream.of(orderBy.split(",")).map(item -> {
@@ -328,7 +333,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
                 final String   field = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, split[0]);
                 return field + (split.length > 1 ? " " + split[1] : "");
             }).collect(Collectors.joining(","));
-            return PageMethod.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
+            return PageHelper.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
         }
     }
 
