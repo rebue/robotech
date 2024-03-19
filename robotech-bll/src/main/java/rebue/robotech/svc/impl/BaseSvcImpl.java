@@ -5,7 +5,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.CaseFormat;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -51,21 +50,18 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected CLONE_MAPPER _cloneMapper;
+    protected CLONE_MAPPER     _cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER       _mybatisMapper;
-
-    @Resource
-    private CuratorFramework _zkClient;
-//    @Resource
-//    private   IdWorkerProperties _idWorkerProperties;
+    protected MAPPER           _mybatisMapper;
+    @Autowired(required = false)
+    private   CuratorFramework _zkClient;
 
     /**
      * 配置idworker参数
-     * 如果以"nodeId:"开头，且值为0~31，则是指定nodeId;
-     * 如果以"auto"开头，则由zookeeper自动分配nodeId，nodeIdBits默认为5
-     * 如果以"auto:"开头，则由zookeeper自动分配nodeId，"auto:"后面跟nodeIdBits的值
-     * 如果不设置，则不使用zookeeper来计算id(仅用于开发或单机模式中)
+     * "auto": 由zookeeper自动分配nodeId(nodeIdBits默认为5)
+     * "auto:xx": 由zookeeper自动分配nodeId("xx"为nodeIdBits的值)
+     * "nodeId:xx": 指定nodeId(xx值为0~31)
+     * 不设置: 不使用zookeeper来计算id(仅用于开发或单机模式中)
      */
     @Value("${rebue.idworker}")
     private String idworker;
@@ -73,7 +69,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * ID生成器
      */
-//    @Resource
     private IdWorker3 _idWorker;
 
     @PostConstruct
@@ -81,44 +76,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
     }
 
-//    @PostConstruct
-//    public void init() throws Exception {
-//        final String packageName       = this.getClass().getPackage().getName();
-//        final String className         = this.getClass().getSimpleName();
-//        final String reducePackageName = packageName.replaceAll(".svc.impl.ex", "").replaceAll(".svc.impl", "");
-//        final String reduceClassName   = className.replaceAll("SvcImpl", "");
-//        final String zkNodePath        = "/idworker/" + reducePackageName + "/" + reduceClassName;
-//
-//        // 从配置中读取节点ID的二进制的位数
-//        int       nodeIdBits    = _idWorkerProperties.getNodeIdBits();
-//        final Svc svcProperties = _idWorkerProperties.getSvces().get(reduceClassName);
-//        if (svcProperties != null && svcProperties.getNodeIdBits() != null) {
-//            nodeIdBits = svcProperties.getNodeIdBits();
-//        }
-//
-//        Integer nodeId;
-//        LOOP:
-//        while (true) {
-//            final String zkNodeFullName   = _zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodePath + "/id_");
-//            final String zkNodeSimpleName = zkNodeFullName.substring(zkNodeFullName.lastIndexOf("/") + 1);
-//            nodeId = getNodeId(zkNodeFullName, nodeIdBits);
-//            final List<String> zkNodes = _zkClient.getChildren().forPath(zkNodePath);
-//            for (final String zkNodeSimpleNameTemp : zkNodes) {
-//                if (zkNodeSimpleNameTemp.equals(zkNodeSimpleName)) {
-//                    continue;
-//                }
-//                final Integer nodeIdTemp = getNodeId(zkNodeSimpleNameTemp, nodeIdBits);
-//                if (nodeIdTemp.equals(nodeId)) {
-//                    _zkClient.delete().forPath(zkNodeFullName);
-//                    continue LOOP;
-//                }
-//            }
-//            break;
-//        }
-//        _idWorker = new IdWorker3(nodeId, nodeIdBits);
-//    }
-
-    protected abstract Class<MO> getMoClass();
+//    protected abstract Class<MO> getMoClass();
 
     protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
 
@@ -159,13 +117,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
-        if (_mybatisMapper.getColumns().length > 1) {
-            // XXX 新添加的记录肯定不在缓存中，调用接口的getById方法不可能查到缓存，不用担心
-            return getThisSvc().getById(mo.getId());
-        } else {
-            log.info("该表只有一个字段，Mapper没有生成selectByPrimaryKey的方法，直接返回id的Mo");
-            return mo;
-        }
+        // XXX 通过调用getById，如果有缓存机制，可将新添加的记录存入缓存中
+        return getThisSvc().getById(mo.getId());
     }
 
     /**

@@ -60,10 +60,10 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.dubbo</groupId>-->
+        <!--            <artifactId>dubbo</artifactId>-->
+        <!--        </dependency>-->
 
         <!-- MyBatis的分页插件 -->
         <dependency>
