@@ -11,6 +11,9 @@ import org.apache.curator.framework.CuratorFramework;
 import org.mybatis.dynamic.sql.exception.NonRenderingWhereClauseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
@@ -46,6 +49,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+@RefreshScope
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
 
@@ -73,6 +77,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     @PostConstruct
     public void init() throws Exception {
+        createIdWorker();
+    }
+
+    @EventListener
+    public void eventListener(EnvironmentChangeEvent event) {
+        log.info("config change: {}", event.getKeys());
+        createIdWorker();
+    }
+
+    private void createIdWorker() {
         _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
     }
 
