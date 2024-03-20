@@ -1,5 +1,8 @@
 package rebue.robotech.svc.impl;
 
+import cn.zhxu.bs.BeanSearcher;
+import cn.zhxu.bs.MapSearcher;
+import cn.zhxu.bs.SearchResult;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -26,6 +29,7 @@ import rebue.wheel.core.idworker.IdWorker3;
 import rebue.wheel.core.idworker.IdWorkerUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,9 +58,19 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected CLONE_MAPPER     _cloneMapper;
+    protected CLONE_MAPPER     cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER           _mybatisMapper;
+    protected MAPPER           mybatisMapper;
+    /**
+     * 注入 Map 检索器，它检索出来的数据以 Map 对象呈现
+     */
+    @Autowired
+    protected MapSearcher      mapSearcher;
+    /**
+     * 注入 Bean 检索器，它检索出来的数据以 泛型 对象呈现
+     */
+    @Autowired
+    protected BeanSearcher     beanSearcher;
     @Autowired(required = false)
     private   CuratorFramework _zkClient;
 
@@ -90,7 +104,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
     }
 
-//    protected abstract Class<MO> getMoClass();
+    protected abstract Class<MO> getMoClass();
 
     protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
 
@@ -103,7 +117,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO add(final ADD_TO to) {
-        final MO mo = _cloneMapper.addToMapMo(to);
+        final MO mo = cloneMapper.addToMapMo(to);
         return getThisSvc().addMo(mo);
     }
 
@@ -127,7 +141,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         final Long now = System.currentTimeMillis();
         mo.setCreateTimestamp(now);
         mo.setUpdateTimestamp(now);
-        final int rowCount = _mybatisMapper.insertSelective(mo);
+        final int rowCount = mybatisMapper.insertSelective(mo);
         if (rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
@@ -144,7 +158,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public MO modifyById(final MODIFY_TO to) {
-        final MO mo = _cloneMapper.modifyToMapMo(to);
+        final MO mo = cloneMapper.modifyToMapMo(to);
         return getThisSvc().modifyMoById(mo);
     }
 
@@ -153,7 +167,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public MO modifyMoById(final MO mo) {
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
-        final int rowCount = _mybatisMapper.updateByPrimaryKeySelective(mo);
+        final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
         }
@@ -173,7 +187,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void delById(final ID id) {
-        final int rowCount = _mybatisMapper.deleteByPrimaryKey(id);
+        final int rowCount = mybatisMapper.deleteByPrimaryKey(id);
         if (rowCount == 0) {
             throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
         }
@@ -192,8 +206,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
         try {
-            final MO mo = _cloneMapper.delToMapMo(to);
-            return _mybatisMapper.deleteSelective(mo);
+            final MO mo = cloneMapper.delToMapMo(to);
+            return mybatisMapper.deleteSelective(mo);
         } catch (NonRenderingWhereClauseException e) {
             throw new RuntimeExceptionX("不能执行不带条件的删除操作");
         }
@@ -202,12 +216,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
+     * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
      */
     @Override
-    public MO getOne(final ONE_TO qo) {
-        final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mybatisMapper.selectOne(mo).orElse(null);
+    public MO getOne(final ONE_TO qc) {
+        final MO mo = cloneMapper.oneToMapMo(qc);
+        return mybatisMapper.selectOne(mo).orElse(null);
     }
 
     /**
@@ -218,45 +232,54 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public MO getById(final ID id) {
-        return _mybatisMapper.selectByPrimaryKey(id).orElse(null);
+        return mybatisMapper.selectByPrimaryKey(id).orElse(null);
     }
 
     /**
      * 判断指定ID的记录是否存在
+     *
+     * @param id 要查询对象的ID
+     * @return 是否存在
      */
     @Override
     public Boolean existById(final ID id) {
-        return _mybatisMapper.existByPrimaryKey(id);
+        return mybatisMapper.existByPrimaryKey(id);
     }
 
     /**
      * 判断符合条件的记录是否存在
+     *
+     * @param qc 查询条件
+     * @return 是否存在
      */
     @Override
-    public Boolean existSelective(final ONE_TO qo) {
-        final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mybatisMapper.existSelective(mo);
+    public Boolean existSelective(final ONE_TO qc) {
+        final MO mo = cloneMapper.oneToMapMo(qc);
+        return mybatisMapper.existSelective(mo);
     }
 
     /**
      * 统计符合条件的记录数
+     *
+     * @param qc 查询条件
+     * @return 符合条件的记录数
      */
     @Override
-    public Long countSelective(final ONE_TO qo) {
-        final MO mo = _cloneMapper.oneToMapMo(qo);
-        return _mybatisMapper.countSelective(mo);
+    public Long countSelective(final ONE_TO qc) {
+        final MO mo = cloneMapper.oneToMapMo(qc);
+        return mybatisMapper.countSelective(mo);
     }
 
     /**
      * 条件查询
      *
-     * @param qo 查询条件
+     * @param qc 查询条件
      * @return 查询列表
      */
     @Override
-    public List<MO> list(final LIST_TO qo) {
-        final MO mo = _cloneMapper.listToMapMo(qo);
-        return _mybatisMapper.selectSelective(mo);
+    public List<MO> list(final LIST_TO qc) {
+        final MO mo = cloneMapper.listToMapMo(qc);
+        return mybatisMapper.selectSelective(mo);
     }
 
     /**
@@ -267,7 +290,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> listIn(final List<ID> ids) {
-        return _mybatisMapper.selectIn(ids);
+        return mybatisMapper.selectIn(ids);
     }
 
     /**
@@ -277,7 +300,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<MO> listAll() {
-        return _mybatisMapper.select(c -> c);
+        return mybatisMapper.select(c -> c);
     }
 
     /**
@@ -307,14 +330,35 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 分页查询列表
      *
-     * @param qo 查询条件
+     * @param qc 查询条件
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(final PAGE_TO qo) {
-        final MO      mo     = _cloneMapper.pageToMapMo(qo);
-        final ISelect select = () -> _mybatisMapper.selectSelective(mo);
-        return getThisSvc().page(select, qo.getPageNum(), qo.getPageSize(), qo.getOrderBy());
+    public PageInfo<MO> page(final PAGE_TO qc) {
+        final MO      mo     = cloneMapper.pageToMapMo(qc);
+        final ISelect select = () -> mybatisMapper.selectSelective(mo);
+        return getThisSvc().page(select, qc.getPageNum(), qc.getPageSize(), qc.getOrderBy());
     }
 
+    /**
+     * 适合需要分页的查询
+     *
+     * @param <T>     bean 类型
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    public SearchResult<MO> beanSearch(Map<String, Object> paraMap) {
+        return beanSearcher.search(getMoClass(), paraMap);
+    }
+
+    /**
+     * 适合需要分页的查询
+     *
+     * @param <T>     bean 类型
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    public SearchResult<Map<String, Object>> mapSearch(Map<String, Object> paraMap) {
+        return mapSearcher.search(getMoClass(), paraMap);
+    }
 }

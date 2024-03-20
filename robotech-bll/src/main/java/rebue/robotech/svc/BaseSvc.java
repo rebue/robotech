@@ -85,9 +85,9 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
+     * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
      */
-    MO getOne(@Valid ONE_TO qo);
+    MO getOne(@Valid ONE_TO qc);
 
     /**
      * 根据ID获取一条MyBatis Model对象的记录
@@ -99,26 +99,35 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
 
     /**
      * 判断指定ID的记录是否存在
+     *
+     * @param id 要查询对象的ID
+     * @return 是否存在
      */
     Boolean existById(@NotNull ID id);
 
     /**
      * 判断符合条件的记录是否存在
+     *
+     * @param qc 查询条件
+     * @return 是否存在
      */
-    Boolean existSelective(@Valid ONE_TO qo);
+    Boolean existSelective(@Valid ONE_TO qc);
 
     /**
      * 统计符合条件的记录数
+     *
+     * @param qc 查询条件
+     * @return 符合条件的记录数
      */
-    Long countSelective(@Valid final ONE_TO qo);
+    Long countSelective(@Valid final ONE_TO qc);
 
     /**
      * 条件查询
      *
-     * @param qo 查询条件
+     * @param qc 查询条件
      * @return 查询列表
      */
-    List<MO> list(@Valid final LIST_TO qo);
+    List<MO> list(@Valid final LIST_TO qc);
 
     /**
      * 根据ID列表查询
@@ -149,9 +158,9 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     /**
      * 分页查询列表
      *
-     * @param qo 查询条件
+     * @param qc 查询条件
      * @return 查询到的分页信息
      */
-    PageInfo<MO> page(@Valid PAGE_TO qo);
+    PageInfo<MO> page(@Valid PAGE_TO qc);
 
 }

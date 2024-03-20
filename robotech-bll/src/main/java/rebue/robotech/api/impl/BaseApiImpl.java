@@ -3,13 +3,13 @@ package rebue.robotech.api.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import rebue.robotech.api.BaseApi;
+import rebue.robotech.clone.MapStructMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.api.ra.BooleanRa;
 import rebue.wheel.api.ra.IdRa;
 import rebue.wheel.api.ra.PageRa;
-import rebue.wheel.api.ra.PojoRa;
 import rebue.wheel.api.ro.Rt;
 
 @Slf4j
@@ -53,36 +53,49 @@ public abstract class BaseApiImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
+     * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
      */
     @Override
-    public Rt<PojoRa<MO>> getOne(final ONE_TO qo) {
-        return Rt.success("查询成功", new PojoRa<>(_svc.getOne(qo)));
+    public Rt<MO> getOne(final ONE_TO qc) {
+        return Rt.success("查询成功", _svc.getOne(qc));
     }
 
     /**
      * 根据ID获取一条MyBatis Model对象的记录
      *
      * @param id 要获取对象的ID
+     * @return 查询结果
      */
     @Override
-    public Rt<PojoRa<MO>> getById(final ID id) {
-        return Rt.success("查询成功", new PojoRa<>(_svc.getById(id)));
+    public Rt<MO> getById(final ID id) {
+        return Rt.success("查询成功", _svc.getById(id));
     }
 
+    /**
+     * 判断指定ID的记录是否存在
+     *
+     * @param id 要查询对象的ID
+     * @return 是否存在
+     */
     @Override
     public Rt<BooleanRa> existById(final ID id) {
         return Rt.success("查询成功", new BooleanRa(_svc.existById(id)));
     }
 
+    /**
+     * 分页查询列表
+     *
+     * @param qc 查询条件
+     * @return 查询到的分页信息
+     */
     @Override
-    public Rt<PageRa<MO>> page(final PAGE_TO qo) {
-        if (qo.getPageSize() != null && qo.getPageSize() > _limitPageSize) {
+    public Rt<PageRa<MO>> page(final PAGE_TO qc) {
+        if (qc.getPageSize() != null && qc.getPageSize() > _limitPageSize) {
             final String msg = "pageSize不能大于" + _limitPageSize;
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        return Rt.success("分页查询成功", new PageRa<>(_svc.page(qo)));
+        return Rt.success("分页查询成功", MapStructMapper.INSTANCE.pageInfoMapPageRa(_svc.page(qc)));
     }
 
 }

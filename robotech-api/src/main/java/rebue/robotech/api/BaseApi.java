@@ -4,7 +4,6 @@ import rebue.robotech.to.PageTo;
 import rebue.wheel.api.ra.BooleanRa;
 import rebue.wheel.api.ra.IdRa;
 import rebue.wheel.api.ra.PageRa;
-import rebue.wheel.api.ra.PojoRa;
 import rebue.wheel.api.ro.Rt;
 
 public interface BaseApi<ID, ADD_TO, MODIFY_TO, ONE_TO, PAGE_TO extends PageTo, MO> {
@@ -26,19 +25,32 @@ public interface BaseApi<ID, ADD_TO, MODIFY_TO, ONE_TO, PAGE_TO extends PageTo, 
     /**
      * 根据条件获取一条记录
      *
-     * @param qo 要获取记录需要符合的条件，如果查找不到则返回null
+     * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
+     * @return 查询结果
      */
-    Rt<PojoRa<MO>> getOne(ONE_TO qo);
+    Rt<MO> getOne(ONE_TO qc);
 
     /**
      * 根据ID获取一条MyBatis Model对象的记录
      *
      * @param id 要获取对象的ID
      */
-    Rt<PojoRa<MO>> getById(ID id);
+    Rt<MO> getById(ID id);
 
+    /**
+     * 判断指定ID的记录是否存在
+     *
+     * @param id 要查询对象的ID
+     * @return 是否存在
+     */
     Rt<BooleanRa> existById(ID id);
 
-    Rt<PageRa<MO>> page(PAGE_TO qo);
+    /**
+     * 分页查询列表
+     *
+     * @param qc 查询条件
+     * @return 查询到的分页信息
+     */
+    Rt<PageRa<MO>> page(PAGE_TO qc);
 
 }
