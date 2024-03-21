@@ -2,7 +2,6 @@ package rebue.robotech.svc.impl;
 
 import cn.zhxu.bs.BeanSearcher;
 import cn.zhxu.bs.MapSearcher;
-import cn.zhxu.bs.SearchResult;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -20,11 +19,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
+import rebue.robotech.clone.MapStructMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
 import rebue.wheel.api.exception.RuntimeExceptionX;
+import rebue.wheel.api.ra.PageRa;
 import rebue.wheel.core.idworker.IdWorker3;
 import rebue.wheel.core.idworker.IdWorkerUtils;
 
@@ -38,8 +39,7 @@ import java.util.stream.Stream;
  * 服务实现层的父类
  *
  * <pre>
- * 封装了一些常用的增删改查的方法，并同时提供了MyBatis和JPA两种操作数据库的方式
- * 鱼和熊掌可以兼得矣，但是在有了MyBatis之后，JPA很鸡肋，JPA大概会有种“既生瑜何生亮”的感觉
+ * 封装了一些常用的增删改查的方法
  *
  * 注意：
  * 1. 查询数据库操作的方法，不用设置默认 @Transactional
@@ -49,6 +49,7 @@ import java.util.stream.Stream;
  *    要想回滚事务，须抛出运行时异常(RuntimeException)
  * 3. 如果类上方不带任何参数的 @Transactional 注解时，如同下面的设置
  *    propagation(传播模式)=REQUIRED，readOnly=false，isolation(事务隔离级别)=READ_COMMITTED
+ * 4. 如果要调用自己的方法，应该使用getThisSvc()代替this来调用，这样该方法的事务才会起效
  * </pre>
  */
 @Slf4j
@@ -73,6 +74,27 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     protected BeanSearcher     beanSearcher;
     @Autowired(required = false)
     private   CuratorFramework _zkClient;
+
+    /**
+     * 默认分页大小
+     */
+    @Value("${rebue.page.default-page-size:10}")
+    private Integer defaultPageSize;
+    /**
+     * beanSearcher当前页的名称
+     */
+    @Value("${bean-searcher.params.pagination.page:page}")
+    private String  pageNumName;
+    /**
+     * beanSearcher分页的大小
+     */
+    @Value("${bean-searcher.params.pagination.size:size}")
+    private String  pageSizeName;
+    /**
+     * beanSearcher起始页
+     */
+    @Value("${bean-searcher.params.pagination.start:0}")
+    private Integer pageStart;
 
     /**
      * 配置idworker参数
@@ -104,9 +126,29 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
     }
 
+
+    /**
+     * 从接口获取本服务的单例
+     * XXX 如果要调用自己的方法，涉及到可能要回滚事务的，请使用getThisSvc()代替this来调用，这样该方法的事务才能回滚
+     *
+     * @return 本服务的单例
+     */
+    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
+
+    /**
+     * 泛型MO的class(子类提供给基类调用-因为java中泛型擦除，JVM无法智能获取泛型的class)
+     *
+     * @return 泛型MO的class
+     */
     protected abstract Class<MO> getMoClass();
 
-    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
+    /**
+     * 获取最大分页大小
+     * 如果分页查询传过来的分页大小大于这个值，那么抛出异常
+     *
+     * @return 最大分页大小
+     */
+    protected abstract Integer getMaxPageSize();
 
     /**
      * 添加记录
@@ -313,9 +355,14 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
+    public PageRa<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
+        // 如果传过来的分页大小大于最大分页大小，抛出异常
+        if (pageSize != null && pageSize > this.getMaxPageSize()) {
+            throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
+        }
+        PageInfo<Object> pageInfo;
         if (StringUtils.isBlank(orderBy)) {
-            return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
+            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
         } else {
             // 将orderBy由小驼峰格式转化为数据库规范的大写下划线格式
             final String newOrderBy = Stream.of(orderBy.split(",")).map(item -> {
@@ -323,8 +370,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
                 final String   field = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, split[0]);
                 return field + (split.length > 1 ? " " + split[1] : "");
             }).collect(Collectors.joining(","));
-            return PageHelper.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
+            pageInfo = PageHelper.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
         }
+        return MapStructMapper.INSTANCE.pageInfoMapPageRa(pageInfo);
     }
 
     /**
@@ -334,7 +382,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageInfo<MO> page(final PAGE_TO qc) {
+    public PageRa<MO> page(final PAGE_TO qc) {
         final MO      mo     = cloneMapper.pageToMapMo(qc);
         final ISelect select = () -> mybatisMapper.selectSelective(mo);
         return getThisSvc().page(select, qc.getPageNum(), qc.getPageSize(), qc.getOrderBy());
@@ -347,8 +395,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return { 总条数，数据列表 }
      */
     @Override
-    public SearchResult<MO> beanSearch(Map<String, Object> paraMap) {
-        return beanSearcher.search(getMoClass(), paraMap);
+    public PageRa<MO> beanSearch(Map<String, Object> paraMap) {
+        long       total  = beanSearcher.searchCount(getMoClass(), paraMap).longValue();
+        PageRa<MO> pageRa = (PageRa<MO>) correctPageParam(total, paraMap);
+        pageRa.setList(beanSearcher.searchList(getMoClass(), paraMap));
+        return pageRa;
     }
 
     /**
@@ -358,7 +409,47 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return { 总条数，数据列表 }
      */
     @Override
-    public SearchResult<Map<String, Object>> mapSearch(Map<String, Object> paraMap) {
-        return mapSearcher.search(getMoClass(), paraMap);
+    public PageRa<?> mapSearch(Map<String, Object> paraMap) {
+        long                        total  = mapSearcher.searchCount(getMoClass(), paraMap).longValue();
+        PageRa<Map<String, Object>> pageRa = (PageRa<Map<String, Object>>) correctPageParam(total, paraMap);
+        pageRa.setList(mapSearcher.searchList(getMoClass(), paraMap));
+        return pageRa;
     }
+
+    /**
+     * bean searcher校正分页参数
+     *
+     * @param total   总条数
+     * @param paraMap 请求的参数
+     * @return 校正后的分页信息
+     */
+    private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
+        Integer pageNum   = (Integer) paraMap.get(pageNumName);   // 当前页
+        Integer pageSize  = (Integer) paraMap.get(pageSizeName); // 分页大小
+        int     pageCount = (int) Math.ceil((double) total / pageSize); // 总页数
+
+        // 如果当前页的参数为空，那么设置为起始页
+        if (pageNum == null) pageNum = pageStart;
+        // 如果分页大小的参数为空，那么设置为默认分页大小
+        if (pageSize == null) pageSize = defaultPageSize;
+        // 如果传过来的分页大小大于最大分页大小，抛出异常
+        if (pageSize != null && pageSize > this.getMaxPageSize()) {
+            throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
+        }
+        // 如果当前页小于起始页，设置为起始页
+        if (pageNum < pageStart) {
+            pageNum = pageStart;
+            paraMap.put(pageNumName, pageNum);
+        }
+        // 如果当前页数大于总页数，设置当前页数为最后一页(即总页数-起始页)
+        if (pageNum > pageCount) {
+            pageNum = pageCount - pageStart;
+            paraMap.put(pageNumName, pageNum);
+        }
+        return PageRa.builder()
+                .total(total)
+                .pageNum(pageNum)
+                .build();
+    }
+
 }

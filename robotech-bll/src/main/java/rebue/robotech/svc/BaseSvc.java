@@ -1,13 +1,12 @@
 package rebue.robotech.svc;
 
-import cn.zhxu.bs.SearchResult;
 import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageInfo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.to.PageTo;
+import rebue.wheel.api.ra.PageRa;
 
 import java.util.List;
 import java.util.Map;
@@ -155,7 +154,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param orderBy  排序字段
      * @return 查询到的分页信息
      */
-    PageInfo<MO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
+    PageRa<MO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
 
     /**
      * 分页查询列表
@@ -163,7 +162,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param qc 查询条件
      * @return 查询到的分页信息
      */
-    PageInfo<MO> page(@Valid PAGE_TO qc);
+    PageRa<MO> page(@Valid PAGE_TO qc);
 
     /**
      * 适合需要分页的查询
@@ -171,7 +170,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      * @return { 总条数，数据列表 }
      */
-    SearchResult<MO> beanSearch(Map<String, Object> paraMap);
+    PageRa<MO> beanSearch(Map<String, Object> paraMap);
 
     /**
      * 适合需要分页的查询
@@ -179,5 +178,5 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      * @return { 总条数，数据列表 }
      */
-    SearchResult<Map<String, Object>> mapSearch(Map<String, Object> paraMap);
+    PageRa<?> mapSearch(Map<String, Object> paraMap);
 }
