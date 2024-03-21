@@ -424,9 +424,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        Integer pageNum   = (Integer) paraMap.get(pageNumName);   // 当前页
-        Integer pageSize  = (Integer) paraMap.get(pageSizeName); // 分页大小
-        int     pageCount = (int) Math.ceil((double) total / pageSize); // 总页数
+        Integer pageNum  = (Integer) paraMap.get(pageNumName);   // 当前页
+        Integer pageSize = (Integer) paraMap.get(pageSizeName); // 分页大小
 
         // 如果当前页的参数为空，那么设置为起始页
         if (pageNum == null) pageNum = pageStart;
@@ -441,6 +440,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             pageNum = pageStart;
             paraMap.put(pageNumName, pageNum);
         }
+        // 计算总页数
+        int pageCount = (int) Math.ceil((double) total / pageSize); // 总页数
         // 如果当前页数大于总页数，设置当前页数为最后一页(即总页数-起始页)
         if (pageNum > pageCount) {
             pageNum = pageCount - pageStart;
