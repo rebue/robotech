@@ -1,5 +1,6 @@
 package rebue.robotech.svc;
 
+import cn.zhxu.bs.SearchResult;
 import com.github.pagehelper.ISelect;
 import com.github.pagehelper.PageInfo;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.to.PageTo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 基础服务层接口
@@ -163,4 +165,19 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      */
     PageInfo<MO> page(@Valid PAGE_TO qc);
 
+    /**
+     * 适合需要分页的查询
+     *
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    SearchResult<MO> beanSearch(Map<String, Object> paraMap);
+
+    /**
+     * 适合需要分页的查询
+     *
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    SearchResult<Map<String, Object>> mapSearch(Map<String, Object> paraMap);
 }

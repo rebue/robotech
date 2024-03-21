@@ -343,10 +343,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 适合需要分页的查询
      *
-     * @param <T>     bean 类型
      * @param paraMap 检索参数
      * @return { 总条数，数据列表 }
      */
+    @Override
     public SearchResult<MO> beanSearch(Map<String, Object> paraMap) {
         return beanSearcher.search(getMoClass(), paraMap);
     }
@@ -354,10 +354,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     /**
      * 适合需要分页的查询
      *
-     * @param <T>     bean 类型
      * @param paraMap 检索参数
      * @return { 总条数，数据列表 }
      */
+    @Override
     public SearchResult<Map<String, Object>> mapSearch(Map<String, Object> paraMap) {
         return mapSearcher.search(getMoClass(), paraMap);
     }
