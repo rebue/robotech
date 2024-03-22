@@ -1,6 +1,11 @@
 package rebue.robotech.clone;
 
-public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
+import java.util.List;
+
+public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
+    VO moMapVo(MO to);
+
+    List<VO> moListMapVoList(List<MO> to);
 
     MO addToMapMo(ADD_TO to);
 

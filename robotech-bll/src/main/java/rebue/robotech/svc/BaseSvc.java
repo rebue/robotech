@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.to.PageTo;
+import rebue.robotech.vo.Vo;
 import rebue.wheel.api.ra.PageRa;
 
 import java.util.List;
@@ -31,17 +32,18 @@ import java.util.Map;
  * @param <LIST_TO>   列表参数的类型
  * @param <PAGE_TO>   分页参数的类型
  * @param <MO>        Mybatis模型对象的类型
+ * @param <VO>        视图对象的类型
  * @author zbz
  */
 @Validated
-public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>> {
+public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>> {
     /**
      * 添加记录
      *
      * @param to 添加的参数
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
-    MO add(@Valid ADD_TO to);
+    VO add(@Valid ADD_TO to);
 
     /**
      * 添加记录
@@ -49,7 +51,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param mo 添加的参数
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
-    MO addMo(@Valid MO mo);
+    VO addMo(@Valid MO mo);
 
     /**
      * 通过ID修改记录内容
@@ -57,7 +59,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param to 修改的参数，必须包含ID
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
-    MO modifyById(@Valid MODIFY_TO to);
+    VO modifyById(@Valid MODIFY_TO to);
 
     /**
      * 通过ID修改记录内容
@@ -65,7 +67,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param mo 修改的参数，必须包含ID
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
-    MO modifyMoById(@Valid MO mo);
+    VO modifyMoById(@Valid MO mo);
 
     /**
      * 通过ID删除记录
@@ -88,7 +90,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
      */
-    MO getOne(@Valid ONE_TO qc);
+    VO getOne(@Valid ONE_TO qc);
 
     /**
      * 根据ID获取一条MyBatis Model对象的记录
@@ -96,7 +98,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param id 要获取对象的ID
      * @return MyBatis Model对象，如果查找不到则返回null
      */
-    MO getById(@NotNull ID id);
+    VO getById(@NotNull ID id);
 
     /**
      * 判断指定ID的记录是否存在
@@ -128,7 +130,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param qc 查询条件
      * @return 查询列表
      */
-    List<MO> list(@Valid final LIST_TO qc);
+    List<VO> list(@Valid final LIST_TO qc);
 
     /**
      * 根据ID列表查询
@@ -136,14 +138,14 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param ids ID列表
      * @return 查询列表
      */
-    List<MO> listIn(final List<ID> ids);
+    List<VO> listIn(final List<ID> ids);
 
     /**
      * 查询所有
      *
      * @return 查询列表
      */
-    List<MO> listAll();
+    List<VO> listAll();
 
     /**
      * 分页查询列表
@@ -154,7 +156,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param orderBy  排序字段
      * @return 查询到的分页信息
      */
-    PageRa<MO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
+    PageRa<VO> page(@NotNull ISelect select, @NotNull Integer pageNum, @NotNull Integer pageSize, String orderBy);
 
     /**
      * 分页查询列表
@@ -162,7 +164,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param qc 查询条件
      * @return 查询到的分页信息
      */
-    PageRa<MO> page(@Valid PAGE_TO qc);
+    PageRa<VO> page(@Valid PAGE_TO qc);
 
     /**
      * 适合需要分页的查询
@@ -170,7 +172,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      * @return { 总条数，数据列表 }
      */
-    PageRa<MO> beanSearch(Map<String, Object> paraMap);
+    PageRa<VO> beanSearch(Map<String, Object> paraMap);
 
     /**
      * 适合需要分页的查询

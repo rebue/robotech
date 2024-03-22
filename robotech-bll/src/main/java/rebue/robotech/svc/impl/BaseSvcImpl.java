@@ -24,6 +24,7 @@ import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.PageTo;
+import rebue.robotech.vo.Vo;
 import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.api.ra.PageRa;
 import rebue.wheel.core.idworker.IdWorker3;
@@ -55,8 +56,8 @@ import java.util.stream.Stream;
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @RefreshScope
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO>>
-        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> {
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
+        implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected CLONE_MAPPER     cloneMapper;
@@ -133,14 +134,14 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      *
      * @return 本服务的单例
      */
-    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO> getThisSvc();
+    protected abstract BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> getThisSvc();
 
     /**
-     * 泛型MO的class(子类提供给基类调用-因为java中泛型擦除，JVM无法智能获取泛型的class)
+     * 泛型VO的class(子类提供给基类调用-因为java中泛型擦除，JVM无法智能获取泛型的class)
      *
      * @return 泛型MO的class
      */
-    protected abstract Class<MO> getMoClass();
+    protected abstract Class<VO> getVoClass();
 
     /**
      * 获取最大分页大小
@@ -158,7 +159,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public MO add(final ADD_TO to) {
+    public VO add(final ADD_TO to) {
         final MO mo = cloneMapper.addToMapMo(to);
         return getThisSvc().addMo(mo);
     }
@@ -169,7 +170,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public MO addMo(final MO mo) {
+    public VO addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
@@ -199,14 +200,14 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public MO modifyById(final MODIFY_TO to) {
+    public VO modifyById(final MODIFY_TO to) {
         final MO mo = cloneMapper.modifyToMapMo(to);
         return getThisSvc().modifyMoById(mo);
     }
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public MO modifyMoById(final MO mo) {
+    public VO modifyMoById(final MO mo) {
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
@@ -261,9 +262,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @param qc 要获取记录需要符合的条件，如果查找不到则返回null
      */
     @Override
-    public MO getOne(final ONE_TO qc) {
+    public VO getOne(final ONE_TO qc) {
         final MO mo = cloneMapper.oneToMapMo(qc);
-        return mybatisMapper.selectOne(mo).orElse(null);
+        return cloneMapper.moMapVo(mybatisMapper.selectOne(mo).orElse(null));
     }
 
     /**
@@ -273,8 +274,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return MyBatis Model对象，如果查找不到则返回null
      */
     @Override
-    public MO getById(final ID id) {
-        return mybatisMapper.selectByPrimaryKey(id).orElse(null);
+    public VO getById(final ID id) {
+        return cloneMapper.moMapVo(mybatisMapper.selectByPrimaryKey(id).orElse(null));
     }
 
     /**
@@ -319,9 +320,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询列表
      */
     @Override
-    public List<MO> list(final LIST_TO qc) {
+    public List<VO> list(final LIST_TO qc) {
         final MO mo = cloneMapper.listToMapMo(qc);
-        return mybatisMapper.selectSelective(mo);
+        return cloneMapper.moListMapVoList(mybatisMapper.selectSelective(mo));
     }
 
     /**
@@ -331,8 +332,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询列表
      */
     @Override
-    public List<MO> listIn(final List<ID> ids) {
-        return mybatisMapper.selectIn(ids);
+    public List<VO> listIn(final List<ID> ids) {
+        return cloneMapper.moListMapVoList(mybatisMapper.selectIn(ids));
     }
 
     /**
@@ -341,8 +342,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询列表
      */
     @Override
-    public List<MO> listAll() {
-        return mybatisMapper.select(c -> c);
+    public List<VO> listAll() {
+        return cloneMapper.moListMapVoList(mybatisMapper.select(c -> c));
     }
 
     /**
@@ -355,7 +356,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageRa<MO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
+    public PageRa<VO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize != null && pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
@@ -382,7 +383,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 查询到的分页信息
      */
     @Override
-    public PageRa<MO> page(final PAGE_TO qc) {
+    public PageRa<VO> page(final PAGE_TO qc) {
         final MO      mo     = cloneMapper.pageToMapMo(qc);
         final ISelect select = () -> mybatisMapper.selectSelective(mo);
         return getThisSvc().page(select, qc.getPageNum(), qc.getPageSize(), qc.getOrderBy());
@@ -395,10 +396,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return { 总条数，数据列表 }
      */
     @Override
-    public PageRa<MO> beanSearch(Map<String, Object> paraMap) {
-        long       total  = beanSearcher.searchCount(getMoClass(), paraMap).longValue();
-        PageRa<MO> pageRa = (PageRa<MO>) correctPageParam(total, paraMap);
-        pageRa.setList(beanSearcher.searchList(getMoClass(), paraMap));
+    public PageRa<VO> beanSearch(Map<String, Object> paraMap) {
+        long       total  = beanSearcher.searchCount(getVoClass(), paraMap).longValue();
+        PageRa<VO> pageRa = (PageRa<VO>) correctPageParam(total, paraMap);
+        pageRa.setList(beanSearcher.searchList(getVoClass(), paraMap));
         return pageRa;
     }
 
@@ -410,9 +411,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public PageRa<?> mapSearch(Map<String, Object> paraMap) {
-        long                        total  = mapSearcher.searchCount(getMoClass(), paraMap).longValue();
+        long                        total  = mapSearcher.searchCount(getVoClass(), paraMap).longValue();
         PageRa<Map<String, Object>> pageRa = (PageRa<Map<String, Object>>) correctPageParam(total, paraMap);
-        pageRa.setList(mapSearcher.searchList(getMoClass(), paraMap));
+        pageRa.setList(mapSearcher.searchList(getVoClass(), paraMap));
         return pageRa;
     }
 
