@@ -167,6 +167,14 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     PageRa<VO> page(@Valid PAGE_TO qc);
 
     /**
+     * 根据条件查询一条记录
+     *
+     * @param paraMap 检索参数
+     * @return 一条记录
+     */
+    VO beanSearchOne(Map<String, Object> paraMap);
+
+    /**
      * 适合需要分页的查询
      *
      * @param paraMap 检索参数
