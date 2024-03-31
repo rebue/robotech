@@ -175,6 +175,14 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     VO beanSearchOne(Map<String, Object> paraMap);
 
     /**
+     * 查询列表
+     *
+     * @param paraMap 检索参数
+     * @return 数据列表
+     */
+    List<VO> beanSearchList(Map<String, Object> paraMap);
+
+    /**
      * 适合需要分页的查询
      *
      * @param paraMap 检索参数

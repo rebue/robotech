@@ -400,6 +400,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     }
 
     /**
+     * 查询列表
+     *
+     * @param paraMap 检索参数
+     * @return 数据列表
+     */
+    @Override
+    public List<VO> beanSearchList(Map<String, Object> paraMap) {
+        return beanSearcher.searchList(getVoClass(), paraMap);
+    }
+
+    /**
      * 分页查询
      *
      * @param paraMap 检索参数
