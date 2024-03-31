@@ -19,7 +19,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
-import rebue.robotech.clone.MapStructMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
@@ -373,7 +372,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
             }).collect(Collectors.joining(","));
             pageInfo = PageHelper.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
         }
-        return MapStructMapper.INSTANCE.pageInfoMapPageRa(pageInfo);
+        return cloneMapper.pageInfoMapPageRa(pageInfo);
     }
 
     /**
