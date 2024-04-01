@@ -18,6 +18,7 @@ public class RebueMapper {
      * @return Byte
      */
     public <E extends Dic> Byte dicItemMapByte(E dicItem) {
+        if (dicItem == null) return null;
         return dicItem.getCode().byteValue();
     }
 

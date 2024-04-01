@@ -222,9 +222,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     /**
      * 通过ID删除记录
+     * 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      *
      * @param id 要删除记录的ID
-     * @return 如果成功，且删除一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -446,8 +446,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        Integer pageNum  = (Integer) paraMap.get(pageNumName);   // 当前页
-        Integer pageSize = (Integer) paraMap.get(pageSizeName); // 分页大小
+        Integer pageNum  = Integer.valueOf(paraMap.get(pageNumName).toString());   // 当前页
+        Integer pageSize = Integer.valueOf(paraMap.get(pageSizeName).toString()); // 分页大小
 
         // 如果当前页的参数为空，那么设置为起始页
         if (pageNum == null) pageNum = pageStart;
