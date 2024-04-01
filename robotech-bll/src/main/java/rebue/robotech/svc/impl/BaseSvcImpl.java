@@ -446,13 +446,18 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        Integer pageNum  = Integer.valueOf(paraMap.get(pageNumName).toString());   // 当前页
-        Integer pageSize = Integer.valueOf(paraMap.get(pageSizeName).toString()); // 分页大小
+        Object page = paraMap == null ? null : paraMap.get(pageNumName);
+        Object size = paraMap == null ? null : paraMap.get(pageSizeName);
 
-        // 如果当前页的参数为空，那么设置为起始页
-        if (pageNum == null) pageNum = pageStart;
-        // 如果分页大小的参数为空，那么设置为默认分页大小
-        if (pageSize == null) pageSize = defaultPageSize;
+        Integer pageNum;
+        Integer pageSize;
+
+        if (page == null) pageNum = pageStart;                  // 如果当前页的参数为空，那么设置为起始页
+        else pageNum = Integer.valueOf(page.toString());        // 否则设置当前页
+
+        if (size == null) pageSize = defaultPageSize;           // 如果分页大小的参数为空，那么设置为默认分页大小
+        else pageSize = Integer.valueOf(size.toString());       // 否则设置分页大小
+
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize != null && pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
