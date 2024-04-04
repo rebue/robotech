@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.rebue.robotech</groupId>
         <artifactId>robotech</artifactId>
-        <version>3.0.17</version>
+        <version>3.0.18</version>
     </parent>
 
     <artifactId>robotech-bll</artifactId>
