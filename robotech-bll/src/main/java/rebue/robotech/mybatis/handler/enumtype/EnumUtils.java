@@ -1,4 +1,4 @@
-package rebue.robotech.mybatis;
+package rebue.robotech.mybatis.handler.enumtype;
 
 import rebue.wheel.api.dic.Dic;
 

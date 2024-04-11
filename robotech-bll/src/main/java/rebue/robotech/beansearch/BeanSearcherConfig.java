@@ -9,4 +9,9 @@ public class BeanSearcherConfig {
     public EnumToByteConvertor enumToByteConvertor() {
         return new EnumToByteConvertor();
     }
+
+    @Bean
+    public PgGeometryToGeometryConvertor pgGeometryToGeometryConvertor() {
+        return new PgGeometryToGeometryConvertor();
+    }
 }

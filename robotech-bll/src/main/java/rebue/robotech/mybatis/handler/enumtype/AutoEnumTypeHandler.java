@@ -1,4 +1,4 @@
-package rebue.robotech.mybatis;
+package rebue.robotech.mybatis.handler.enumtype;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * 启用方法: 在spring boot使用
  * 1. 依赖mybatis-spring-boot-starter
  * 2. 配置文件中配置
- * mybatis.configuration.default-enum-type-handler=rebue.robotech.mybatis.AutoEnumTypeHandler
+ * mybatis.configuration.default-enum-type-handler=rebue.robotech.mybatis.handler.AutoEnumTypeHandler
  */
 public class AutoEnumTypeHandler<E extends Enum<E> & Dic> extends BaseTypeHandler<E> {
     private final static Logger _log = LoggerFactory.getLogger(AutoEnumTypeHandler.class);
@@ -33,7 +33,7 @@ public class AutoEnumTypeHandler<E extends Enum<E> & Dic> extends BaseTypeHandle
         // 如果实现了Dic则使用我们自定义的转换器
         if (Dic.class.isAssignableFrom(type)) {
             // TODO 去除泛型警告及优化基于Dic查找的代码
-            typeHandler = new rebue.robotech.mybatis.EnumTypeHandler(type);
+            typeHandler = new EnumTypeHandler(type);
         }
         // 默认转换器也可换成EnumOrdinalTypeHandler
         else {

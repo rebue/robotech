@@ -1,4 +1,4 @@
-package rebue.robotech.mybatis;
+package rebue.robotech.mybatis.handler.enumtype;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

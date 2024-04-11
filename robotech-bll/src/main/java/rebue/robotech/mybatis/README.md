@@ -10,5 +10,5 @@
 ```yaml
 mybatis:
   configuration:
-    default-enum-type-handler: rebue.robotech.mybatis.AutoEnumTypeHandler
+    default-enum-type-handler: rebue.robotech.mybatis.handler.enumtype.AutoEnumTypeHandler
 ```
