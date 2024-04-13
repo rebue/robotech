@@ -11,10 +11,10 @@ import rebue.wheel.api.dic.Dic;
 import rebue.wheel.api.dic.DicUtils;
 
 /**
- * MapStruct的自定义映射器
+ * MapStruct的自定义枚举映射器
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public class RebueMapper {
+public class EnumConverter {
     /**
      * 字典项映射Byte
      *
@@ -38,33 +38,4 @@ public class RebueMapper {
         return (E) DicUtils.getItem(clazz, Integer.valueOf(code));
     }
 
-    public Point pgGeometryToPoint(PGgeometry pgGeometry) {
-        if (pgGeometry == null) return null;
-        return (Point) pgGeometry.getGeometry();
-    }
-
-    public PGgeometry pointToPgGeometry(Point point) {
-        if (point == null) return null;
-        return new PGgeometry(point);
-    }
-
-    public LineString pgGeometryToLine(PGgeometry pgGeometry) {
-        if (pgGeometry == null) return null;
-        return (LineString) pgGeometry.getGeometry();
-    }
-
-    public PGgeometry lineToPgGeometry(LineString lineString) {
-        if (lineString == null) return null;
-        return new PGgeometry(lineString);
-    }
-
-    public Polygon pgGeometryToPolygon(PGgeometry pgGeometry) {
-        if (pgGeometry == null) return null;
-        return (Polygon) pgGeometry.getGeometry();
-    }
-
-    public PGgeometry polygonToPgGeometry(Polygon polygon) {
-        if (polygon == null) return null;
-        return new PGgeometry(polygon);
-    }
 }
