@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
@@ -219,6 +220,19 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         // XXX 注意这里是this，而不是getThisSvc()，这是避免使用到了缓存
         return this.getById(mo.getId());
     }
+
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VO save(final ADD_TO to) {
+        try {
+            return getThisSvc().add(to);
+        } catch (DuplicateKeyException e) {
+            // 如果已经存在，则修改
+            MODIFY_TO modifyTo = cloneMapper.addToMapModifyTo(to);
+            return getThisSvc().modifyById(modifyTo);
+        }
+    }
+
 
     /**
      * 通过ID删除记录
