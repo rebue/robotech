@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rebue.robotech.clone.CloneMapper;
@@ -32,6 +31,7 @@ import rebue.wheel.core.idworker.IdWorkerUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -202,6 +202,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO modifyById(final MODIFY_TO to) {
         final MO mo = cloneMapper.modifyToMapMo(to);
+        if (mo.getId() == null) throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
         return getThisSvc().modifyMoById(mo);
     }
 
@@ -212,7 +213,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
         if (rowCount == 0) {
-            throw new RuntimeExceptionX("修改记录异常，记录已不存在或有变动");
+            throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
         }
         if (rowCount != 1) {
             throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
@@ -223,13 +224,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VO save(final ADD_TO to) {
+    public VO save(final MODIFY_TO modifyTo) {
         try {
-            return getThisSvc().add(to);
-        } catch (DuplicateKeyException e) {
-            // 如果已经存在，则修改
-            MODIFY_TO modifyTo = cloneMapper.addToMapModifyTo(to);
             return getThisSvc().modifyById(modifyTo);
+        } catch (NoSuchElementException e) {
+            // 如果不存在，则添加
+            ADD_TO addTo = cloneMapper.modifyToMapAddTo(modifyTo);
+            return getThisSvc().add(addTo);
         }
     }
 
@@ -421,7 +422,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
      */
     @Override
     public List<VO> beanSearchList(Map<String, Object> paraMap) {
-        return beanSearcher.searchList(getVoClass(), paraMap);
+        return beanSearcher.searchAll(getVoClass(), paraMap);
     }
 
     /**

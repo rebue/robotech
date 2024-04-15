@@ -76,7 +76,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param to 要添加的内容
      * @return 添加或修改后的内容
      */
-    VO save(ADD_TO to);
+    VO save(MODIFY_TO modifyTo);
 
     /**
      * 通过ID删除记录
