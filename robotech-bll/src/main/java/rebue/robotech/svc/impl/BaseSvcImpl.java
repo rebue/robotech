@@ -22,6 +22,7 @@ import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
 import rebue.robotech.svc.BaseSvc;
+import rebue.robotech.to.ModifyTo;
 import rebue.robotech.to.PageTo;
 import rebue.robotech.vo.Vo;
 import rebue.wheel.api.exception.RuntimeExceptionX;
@@ -56,7 +57,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @RefreshScope
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
@@ -161,16 +162,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO add(final ADD_TO to) {
         final MO mo = cloneMapper.addToMapMo(to);
-        return getThisSvc().addMo(mo);
+        return this.addMo(mo);
     }
 
     /**
+     * 添加记录
      *
+     * @param mo 添加的参数
+     * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
     @SuppressWarnings("unchecked")
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VO addMo(final MO mo) {
+    private VO addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
@@ -203,12 +205,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
     public VO modifyById(final MODIFY_TO to) {
         final MO mo = cloneMapper.modifyToMapMo(to);
         if (mo.getId() == null) throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
-        return getThisSvc().modifyMoById(mo);
+        return this.modifyMoById(mo);
     }
 
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VO modifyMoById(final MO mo) {
+    /**
+     * 通过ID修改记录内容
+     *
+     * @param mo 修改的参数，必须包含ID
+     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
+     */
+    private VO modifyMoById(final MO mo) {
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
@@ -224,14 +230,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VO save(final MODIFY_TO modifyTo) {
-        try {
-            return getThisSvc().modifyById(modifyTo);
-        } catch (NoSuchElementException e) {
-            // 如果不存在，则添加
-            ADD_TO addTo = cloneMapper.modifyToMapAddTo(modifyTo);
-            return getThisSvc().add(addTo);
+    public VO save(final MO mo) {
+        if (mo.getId() != null) {
+            try {
+                // 这里用this，修改如果没有此记录，就添加，而不是回滚
+                return this.modifyMoById(mo);
+            } catch (NoSuchElementException e) {
+            }
         }
+        // 如果不存在，则添加
+        return this.addMo(mo);
     }
 
 

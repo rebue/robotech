@@ -25,6 +25,4 @@ public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     MO pageToMapMo(PAGE_TO to);
 
     MODIFY_TO addToMapModifyTo(ADD_TO to);
-
-    ADD_TO modifyToMapAddTo(MODIFY_TO to);
 }

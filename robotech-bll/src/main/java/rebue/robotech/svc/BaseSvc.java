@@ -46,14 +46,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     VO add(@Valid ADD_TO to);
 
     /**
-     * 添加记录
-     *
-     * @param mo 添加的参数
-     * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
-     */
-    VO addMo(@Valid MO mo);
-
-    /**
      * 通过ID修改记录内容
      *
      * @param to 修改的参数，必须包含ID
@@ -62,21 +54,13 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     VO modifyById(@Valid MODIFY_TO to);
 
     /**
-     * 通过ID修改记录内容
-     *
-     * @param mo 修改的参数，必须包含ID
-     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
-     */
-    VO modifyMoById(@Valid MO mo);
-
-    /**
      * 保存
      * 先添加，如果添加抛出DuplicateKeyException异常，就改为修改
      *
      * @param to 要添加的内容
      * @return 添加或修改后的内容
      */
-    VO save(MODIFY_TO modifyTo);
+    VO save(MO mo);
 
     /**
      * 通过ID删除记录
