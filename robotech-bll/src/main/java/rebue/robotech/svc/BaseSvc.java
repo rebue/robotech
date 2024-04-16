@@ -57,7 +57,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 保存
      * 先添加，如果添加抛出DuplicateKeyException异常，就改为修改
      *
-     * @param to 要添加的内容
+     * @param mo 要添加的内容
      * @return 添加或修改后的内容
      */
     VO save(MO mo);
