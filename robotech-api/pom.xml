@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.rebue.robotech</groupId>
         <artifactId>robotech</artifactId>
-        <version>3.3.26</version>
+        <version>3.4.27</version>
     </parent>
 
     <artifactId>robotech-api</artifactId>
@@ -27,6 +27,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- 提供@Validated注解 -->
@@ -57,6 +61,12 @@
         <dependency>
             <groupId>cn.zhxu</groupId>
             <artifactId>bean-searcher</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.postgis</groupId>
+            <artifactId>postgis-jdbc</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

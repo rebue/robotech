@@ -111,7 +111,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
     /**
      * ID生成器
      */
-    private IdWorker3 _idWorker;
+    protected IdWorker3 _idWorker;
 
     @PostConstruct
     public void init() throws Exception {
