@@ -172,7 +172,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
     @SuppressWarnings("unchecked")
-    private VO addMo(final MO mo) {
+    protected VO addMo(final MO mo) {
         if (mo.getIdType().equals("String")) {
             if (StringUtils.isBlank((CharSequence) mo.getId())) {
                 mo.setId((ID) UUID.randomUUID().toString().replace("-", ""));
@@ -214,7 +214,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
      * @param mo 修改的参数，必须包含ID
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
-    private VO modifyMoById(final MO mo) {
+    protected VO modifyMoById(final MO mo) {
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
