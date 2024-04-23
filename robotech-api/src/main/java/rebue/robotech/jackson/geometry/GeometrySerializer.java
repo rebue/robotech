@@ -19,7 +19,8 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
             generator.writeNumber(point.x);
             generator.writeFieldName("y");
             generator.writeNumber(point.y);
-            if (point.z != 0) {
+            // 如果是3D的点，序列化z值
+            if (point.dimension == 3) {
                 generator.writeFieldName("z");
                 generator.writeNumber(point.z);
             }
