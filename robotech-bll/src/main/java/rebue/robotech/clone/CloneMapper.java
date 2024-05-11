@@ -1,12 +1,13 @@
 package rebue.robotech.clone;
 
-import com.github.pagehelper.PageInfo;
-import rebue.wheel.api.ra.PageRa;
-
 import java.util.List;
 
+import com.github.pagehelper.PageInfo;
+
+import rebue.wheel.api.ra.PageRa;
+
 public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
-    PageRa pageInfoMapPageRa(PageInfo pageInfo);
+    PageRa<VO> pageInfoMapPageRa(PageInfo<Object> pageInfo);
 
     VO moMapVo(MO to);
 

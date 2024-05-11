@@ -1,13 +1,12 @@
 package rebue.robotech.svc.impl;
 
-import cn.zhxu.bs.BeanSearcher;
-import cn.zhxu.bs.MapSearcher;
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.google.common.base.CaseFormat;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.mybatis.dynamic.sql.exception.NonRenderingWhereClauseException;
@@ -18,6 +17,16 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.base.CaseFormat;
+
+import cn.zhxu.bs.BeanSearcher;
+import cn.zhxu.bs.MapSearcher;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
@@ -29,13 +38,6 @@ import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.api.ra.PageRa;
 import rebue.wheel.core.idworker.IdWorker3;
 import rebue.wheel.core.idworker.IdWorkerUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 服务实现层的父类
@@ -57,46 +59,46 @@ import java.util.stream.Stream;
 @Slf4j
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @RefreshScope
-public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
+public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected CLONE_MAPPER     cloneMapper;
+    protected CLONE_MAPPER   cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER           mybatisMapper;
+    protected MAPPER         mybatisMapper;
     /**
      * 注入 Map 检索器，它检索出来的数据以 Map 对象呈现
      */
     @Autowired
-    protected MapSearcher      mapSearcher;
+    protected MapSearcher    mapSearcher;
     /**
      * 注入 Bean 检索器，它检索出来的数据以 泛型 对象呈现
      */
     @Autowired
-    protected BeanSearcher     beanSearcher;
+    protected BeanSearcher   beanSearcher;
     @Autowired(required = false)
-    private   CuratorFramework _zkClient;
+    private CuratorFramework _zkClient;
 
     /**
      * 默认分页大小
      */
     @Value("${rebue.page.default-page-size:10}")
-    private Integer defaultPageSize;
+    private Integer          defaultPageSize;
     /**
      * beanSearcher当前页的名称
      */
     @Value("${bean-searcher.params.pagination.page:page}")
-    private String  pageNumName;
+    private String           pageNumName;
     /**
      * beanSearcher分页的大小
      */
     @Value("${bean-searcher.params.pagination.size:size}")
-    private String  pageSizeName;
+    private String           pageSizeName;
     /**
      * beanSearcher起始页
      */
     @Value("${bean-searcher.params.pagination.start:0}")
-    private Integer pageStart;
+    private Integer          pageStart;
 
     /**
      * 配置idworker参数
@@ -106,12 +108,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
      * 不设置: 不使用zookeeper来计算id(仅用于开发或单机模式中)
      */
     @Value("${rebue.idworker}")
-    private String idworker;
+    private String           idworker;
 
     /**
      * ID生成器
      */
-    protected IdWorker3 _idWorker;
+    protected IdWorker3      _idWorker;
 
     @PostConstruct
     public void init() throws Exception {
@@ -127,7 +129,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
     private void createIdWorker() {
         _idWorker = IdWorkerUtils.create3(this, idworker, _zkClient);
     }
-
 
     /**
      * 从接口获取本服务的单例
@@ -204,7 +205,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO modifyById(final MODIFY_TO to) {
         final MO mo = cloneMapper.modifyToMapMo(to);
-        if (mo.getId() == null) throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
+        if (mo.getId() == null)
+            throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
         return this.modifyMoById(mo);
     }
 
@@ -241,7 +243,6 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
         // 如果不存在，则添加
         return this.addMo(mo);
     }
-
 
     /**
      * 通过ID删除记录
@@ -442,6 +443,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
     @Override
     public PageRa<VO> beanSearch(Map<String, Object> paraMap) {
         long       total  = beanSearcher.searchCount(getVoClass(), paraMap).longValue();
+        @SuppressWarnings("unchecked")
         PageRa<VO> pageRa = (PageRa<VO>) correctPageParam(total, paraMap);
         pageRa.setList(beanSearcher.searchList(getVoClass(), paraMap));
         return pageRa;
@@ -456,6 +458,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
     @Override
     public PageRa<?> mapSearch(Map<String, Object> paraMap) {
         long                        total  = mapSearcher.searchCount(getVoClass(), paraMap).longValue();
+        @SuppressWarnings("unchecked")
         PageRa<Map<String, Object>> pageRa = (PageRa<Map<String, Object>>) correctPageParam(total, paraMap);
         pageRa.setList(mapSearcher.searchList(getVoClass(), paraMap));
         return pageRa;
@@ -469,17 +472,21 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo, DEL_TO
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        Object page = paraMap == null ? null : paraMap.get(pageNumName);
-        Object size = paraMap == null ? null : paraMap.get(pageSizeName);
+        Object  page = paraMap == null ? null : paraMap.get(pageNumName);
+        Object  size = paraMap == null ? null : paraMap.get(pageSizeName);
 
         Integer pageNum;
         Integer pageSize;
 
-        if (page == null) pageNum = pageStart;                  // 如果当前页的参数为空，那么设置为起始页
-        else pageNum = Integer.valueOf(page.toString());        // 否则设置当前页
+        if (page == null)
+            pageNum = pageStart;                  // 如果当前页的参数为空，那么设置为起始页
+        else
+            pageNum = Integer.valueOf(page.toString());        // 否则设置当前页
 
-        if (size == null) pageSize = defaultPageSize;           // 如果分页大小的参数为空，那么设置为默认分页大小
-        else pageSize = Integer.valueOf(size.toString());       // 否则设置分页大小
+        if (size == null)
+            pageSize = defaultPageSize;           // 如果分页大小的参数为空，那么设置为默认分页大小
+        else
+            pageSize = Integer.valueOf(size.toString());       // 否则设置分页大小
 
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize != null && pageSize > this.getMaxPageSize()) {
