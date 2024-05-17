@@ -7,7 +7,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.wheel.api.ra.PageRa;
 
 public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
-    PageRa<VO> pageInfoMapPageRa(PageInfo<Object> pageInfo);
+    PageRa<VO> pageInfoMapPageRa(@SuppressWarnings("rawtypes") PageInfo pageInfo);
 
     VO moMapVo(MO to);
 
