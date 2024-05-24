@@ -1,8 +1,9 @@
 package rebue.robotech.valid;
 
+import org.apache.commons.lang3.StringUtils;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.apache.commons.lang3.StringUtils;
 import rebue.wheel.api.dic.Dic;
 import rebue.wheel.api.dic.DicUtils;
 

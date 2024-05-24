@@ -1,19 +1,19 @@
 package rebue.robotech.valid;
 
+import java.lang.annotation.*;
+
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
-import java.lang.annotation.*;
 
 /**
  * 字典校验注解
  */
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 // 限定本注解的处理类
-@Constraint(validatedBy = {DicValidator.class
+@Constraint(validatedBy = { DicValidator.class
 })
 public @interface DicValid {
 

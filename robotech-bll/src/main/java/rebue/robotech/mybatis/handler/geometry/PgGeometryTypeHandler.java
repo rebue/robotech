@@ -1,18 +1,19 @@
 package rebue.robotech.mybatis.handler.geometry;
 
-import net.postgis.jdbc.PGgeometry;
-import org.apache.ibatis.type.BaseTypeHandler;
-import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.MappedJdbcTypes;
-import org.apache.ibatis.type.MappedTypes;
-
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
+import org.apache.ibatis.type.MappedTypes;
+
+import net.postgis.jdbc.PGgeometry;
+
 @MappedJdbcTypes(JdbcType.OTHER)
-@MappedTypes({PGgeometry.class})
+@MappedTypes({ PGgeometry.class })
 public class PgGeometryTypeHandler extends BaseTypeHandler<PGgeometry> {
 
     @Override

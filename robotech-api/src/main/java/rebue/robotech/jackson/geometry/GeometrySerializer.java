@@ -1,12 +1,13 @@
 package rebue.robotech.jackson.geometry;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
 import net.postgis.jdbc.geometry.Geometry;
 import net.postgis.jdbc.geometry.Point;
-
-import java.io.IOException;
 
 public class GeometrySerializer extends JsonSerializer<Geometry> {
     @Override
@@ -30,4 +31,3 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
     }
 
 }
-
