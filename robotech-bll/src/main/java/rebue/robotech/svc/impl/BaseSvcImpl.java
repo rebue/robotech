@@ -1,9 +1,6 @@
 package rebue.robotech.svc.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -238,6 +235,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 // 这里用this，修改如果没有此记录，就添加，而不是回滚
                 return this.modifyMoById(mo);
             } catch (NoSuchElementException e) {
+                // 找不到不用抛异常，后面进行添加的操作
             }
         }
         // 如果不存在，则添加
@@ -420,7 +418,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      */
     @Override
     public VO beanSearchOne(Map<String, Object> paraMap) {
-        return (VO) beanSearcher.searchFirst(getVoClass(), paraMap);
+        return beanSearcher.searchFirst(getVoClass(), paraMap);
     }
 
     /**
@@ -442,11 +440,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      */
     @Override
     public PageRa<VO> beanSearch(Map<String, Object> paraMap) {
-        long       total  = beanSearcher.searchCount(getVoClass(), paraMap).longValue();
-        @SuppressWarnings("unchecked")
-        PageRa<VO> pageRa = (PageRa<VO>) correctPageParam(total, paraMap);
-        pageRa.setList(beanSearcher.searchList(getVoClass(), paraMap));
-        return pageRa;
+        return search(getVoClass(), paraMap);
     }
 
     /**
@@ -465,6 +459,21 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     }
 
     /**
+     * 分页查询(用于自定义查询的VO类)
+     *
+     * @param clazz   查询与数据库映射的VO类
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    @Override
+    public <T> PageRa<T> search(Class<T> clazz, Map<String, Object> paraMap) {
+        long      total  = beanSearcher.searchCount(clazz, paraMap).longValue();
+        PageRa<T> pageRa = (PageRa<T>) correctPageParam(total, paraMap);
+        pageRa.setList(beanSearcher.searchList(clazz, paraMap));
+        return pageRa;
+    }
+
+    /**
      * bean searcher校正分页参数
      *
      * @param total   总条数
@@ -472,21 +481,25 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        Object  page = paraMap == null ? null : paraMap.get(pageNumName);
-        Object  size = paraMap == null ? null : paraMap.get(pageSizeName);
+        if (paraMap == null) {
+            paraMap = new LinkedHashMap<>();
+        }
+
+        Object  page = paraMap.get(pageNumName);
+        Object  size = paraMap.get(pageSizeName);
 
         Integer pageNum;
         Integer pageSize;
 
         if (page == null)
-            pageNum = pageStart;                  // 如果当前页的参数为空，那么设置为起始页
+            pageNum = pageStart;                                // 如果当前页的参数为空，那么设置为起始页
         else
-            pageNum = Integer.valueOf(page.toString());        // 否则设置当前页
+            pageNum = Integer.valueOf(page.toString());         // 否则设置当前页
 
         if (size == null)
-            pageSize = defaultPageSize;           // 如果分页大小的参数为空，那么设置为默认分页大小
+            pageSize = defaultPageSize;                         // 如果分页大小的参数为空，那么设置为默认分页大小
         else
-            pageSize = Integer.valueOf(size.toString());       // 否则设置分页大小
+            pageSize = Integer.valueOf(size.toString());        // 否则设置分页大小
 
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize != null && pageSize > this.getMaxPageSize()) {

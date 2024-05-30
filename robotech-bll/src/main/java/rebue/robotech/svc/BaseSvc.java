@@ -192,4 +192,13 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @return { 总条数，数据列表 }
      */
     PageRa<?> mapSearch(Map<String, Object> paraMap);
+
+    /**
+     * 分页查询(用于自定义查询的VO类)
+     *
+     * @param clazz   查询与数据库映射的VO类
+     * @param paraMap 检索参数
+     * @return { 总条数，数据列表 }
+     */
+    <T> PageRa<T> search(Class<T> clazz, Map<String, Object> paraMap);
 }
