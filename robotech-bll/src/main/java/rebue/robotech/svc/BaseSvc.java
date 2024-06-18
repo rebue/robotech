@@ -48,12 +48,29 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     VO add(@Valid ADD_TO to);
 
     /**
+     * 添加记录
+     *
+     * @param mo 添加的参数
+     * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
+     */
+    @SuppressWarnings("unchecked")
+    VO addMo(MO mo);
+
+    /**
      * 通过ID修改记录内容
      *
      * @param to 修改的参数，必须包含ID
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     VO modifyById(@Valid MODIFY_TO to);
+
+    /**
+     * 通过ID修改记录内容
+     *
+     * @param mo 修改的参数，必须包含ID
+     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
+     */
+    VO modifyMoById(MO mo);
 
     /**
      * 保存
