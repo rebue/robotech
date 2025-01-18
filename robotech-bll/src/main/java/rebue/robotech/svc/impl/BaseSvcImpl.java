@@ -1,13 +1,9 @@
 package rebue.robotech.svc.impl;
 
-import cn.zhxu.bs.BeanSearcher;
-import cn.zhxu.bs.MapSearcher;
-import com.github.pagehelper.ISelect;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.google.common.base.CaseFormat;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.mybatis.dynamic.sql.exception.NonRenderingWhereClauseException;
@@ -18,6 +14,16 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.ISelect;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.base.CaseFormat;
+
+import cn.zhxu.bs.BeanSearcher;
+import cn.zhxu.bs.MapSearcher;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
@@ -29,10 +35,6 @@ import rebue.wheel.api.exception.RuntimeExceptionX;
 import rebue.wheel.api.ra.PageRa;
 import rebue.wheel.core.idworker.IdWorker3;
 import rebue.wheel.core.idworker.IdWorkerUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 服务实现层的父类
@@ -58,42 +60,42 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected CLONE_MAPPER     cloneMapper;
+    protected CLONE_MAPPER   cloneMapper;
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER           mybatisMapper;
+    protected MAPPER         mybatisMapper;
     /**
      * 注入 Map 检索器，它检索出来的数据以 Map 对象呈现
      */
     @Autowired
-    protected MapSearcher      mapSearcher;
+    protected MapSearcher    mapSearcher;
     /**
      * 注入 Bean 检索器，它检索出来的数据以 泛型 对象呈现
      */
     @Autowired
-    protected BeanSearcher     beanSearcher;
+    protected BeanSearcher   beanSearcher;
     @Autowired(required = false)
-    private   CuratorFramework _zkClient;
+    private CuratorFramework _zkClient;
 
     /**
      * 默认分页大小
      */
     @Value("${rebue.page.default-page-size:10}")
-    private Integer defaultPageSize;
+    private Integer          defaultPageSize;
     /**
      * beanSearcher当前页的名称
      */
     @Value("${bean-searcher.params.pagination.page:page}")
-    private String  pageNumName;
+    private String           pageNumName;
     /**
      * beanSearcher分页的大小
      */
     @Value("${bean-searcher.params.pagination.size:size}")
-    private String  pageSizeName;
+    private String           pageSizeName;
     /**
      * beanSearcher起始页
      */
     @Value("${bean-searcher.params.pagination.start:0}")
-    private Integer pageStart;
+    private Integer          pageStart;
 
     /**
      * 配置idworker参数
@@ -103,12 +105,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * 不设置: 不使用zookeeper来计算id(仅用于开发或单机模式中)
      */
     @Value("${rebue.idworker}")
-    private String idworker;
+    private String           idworker;
 
     /**
      * ID生成器
      */
-    protected IdWorker3 _idWorker;
+    protected IdWorker3      _idWorker;
 
     @PostConstruct
     public void init() throws Exception {
@@ -411,10 +413,21 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     }
 
     /**
+     * 根据ID获取一条记录
+     *
+     * @param id 要获取对象的ID
+     * @return 一条记录，如果查找不到则返回null
+     */
+    @Override
+    public VO beanSearchById(final ID id) {
+        return getThisSvc().beanSearchOne(Map.of("id", id));
+    }
+
+    /**
      * 根据条件查询一条记录
      *
      * @param paraMap 检索参数
-     * @return 一条记录
+     * @return 一条记录，如果查找不到则返回null
      */
     @Override
     public VO beanSearchOne(Map<String, Object> paraMap) {
@@ -451,7 +464,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      */
     @Override
     public PageRa<?> mapSearch(Map<String, Object> paraMap) {
-        long total = mapSearcher.searchCount(getVoClass(), paraMap).longValue();
+        long                        total  = mapSearcher.searchCount(getVoClass(), paraMap).longValue();
         @SuppressWarnings("unchecked")
         PageRa<Map<String, Object>> pageRa = (PageRa<Map<String, Object>>) correctPageParam(total, paraMap);
         pageRa.setList(mapSearcher.searchList(getVoClass(), paraMap));
@@ -485,8 +498,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
             paraMap = new LinkedHashMap<>();
         }
 
-        Object page = paraMap.get(pageNumName);
-        Object size = paraMap.get(pageSizeName);
+        Object  page = paraMap.get(pageNumName);
+        Object  size = paraMap.get(pageSizeName);
 
         Integer pageNum;
         Integer pageSize;

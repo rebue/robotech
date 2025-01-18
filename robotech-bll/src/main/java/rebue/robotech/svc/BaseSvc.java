@@ -178,6 +178,8 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      */
     PageRa<VO> page(@Valid PAGE_TO qc);
 
+    VO beanSearchById(final ID id);
+
     /**
      * 根据条件查询一条记录
      *
