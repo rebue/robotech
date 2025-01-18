@@ -1,6 +1,9 @@
 package rebue.robotech.svc.impl;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,13 +19,17 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.ISelect;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.CaseFormat;
 
 import cn.zhxu.bs.BeanSearcher;
 import cn.zhxu.bs.MapSearcher;
+import cn.zhxu.bs.operator.OrLike;
+import cn.zhxu.bs.util.MapUtils;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
@@ -54,8 +61,8 @@ import rebue.wheel.core.idworker.IdWorkerUtils;
  * </pre>
  */
 @Slf4j
-@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @RefreshScope
+@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
@@ -149,6 +156,24 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 最大分页大小
      */
     protected abstract Integer getMaxPageSize();
+
+    /**
+     * 获取树分层大小(默认为3)
+     *
+     * @return 树分层大小
+     */
+    protected int getTreeLevelSize() {
+        return 3;
+    }
+
+    /**
+     * 获取树编码字段名(默认为treeCode)
+     *
+     * @return 树编码字段名
+     */
+    protected String getTreeCodeFieldName() {
+        return "treeCode";
+    }
 
     /**
      * 添加记录
@@ -379,14 +404,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 查询到的分页信息
      */
     @Override
-    public PageRa<VO> page(final ISelect select, final Integer pageNum, final Integer pageSize, final String orderBy) {
+    public PageRa<VO> page(@NotNull final ISelect select, @NotNull final Integer pageNum, @NotNull final Integer pageSize, final String orderBy) {
         // 如果传过来的分页大小大于最大分页大小，抛出异常
-        if (pageSize != null && pageSize > this.getMaxPageSize()) {
+        if (pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
         }
         PageInfo<Object> pageInfo;
         if (StringUtils.isBlank(orderBy)) {
-            pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(select);
+            try (Page<Object> page = PageHelper.startPage(pageNum, pageSize)) {
+                pageInfo = page.doSelectPageInfo(select);
+            }
         } else {
             // 将orderBy由小驼峰格式转化为数据库规范的大写下划线格式
             final String newOrderBy = Stream.of(orderBy.split(",")).map(item -> {
@@ -394,7 +421,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 final String   field = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, split[0]);
                 return field + (split.length > 1 ? " " + split[1] : "");
             }).collect(Collectors.joining(","));
-            pageInfo = PageHelper.startPage(pageNum, pageSize, newOrderBy).doSelectPageInfo(select);
+            try (Page<Object> page = PageHelper.startPage(pageNum, pageSize, newOrderBy)) {
+                pageInfo = page.doSelectPageInfo(select);
+            }
         }
         return cloneMapper.pageInfoMapPageRa(pageInfo);
     }
@@ -410,6 +439,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         final MO      mo     = cloneMapper.pageToMapMo(qc);
         final ISelect select = () -> mybatisMapper.selectSelective(mo);
         return getThisSvc().page(select, qc.getPageNum(), qc.getPageSize(), qc.getOrderBy());
+    }
+
+    /**
+     * 根据条件查询一条记录
+     *
+     * @param paraMap 检索参数
+     * @return 一条记录，如果查找不到则返回null
+     */
+    @Override
+    public VO beanSearchOne(Map<String, Object> paraMap) {
+        return beanSearcher.searchFirst(getVoClass(), paraMap);
     }
 
     /**
@@ -430,8 +470,19 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 一条记录，如果查找不到则返回null
      */
     @Override
-    public VO beanSearchOne(Map<String, Object> paraMap) {
-        return beanSearcher.searchFirst(getVoClass(), paraMap);
+    public Map<String, Object> mapSearchOne(Map<String, Object> paraMap) {
+        return mapSearcher.searchFirst(getVoClass(), paraMap);
+    }
+
+    /**
+     * 根据ID获取一条记录
+     *
+     * @param id 要获取对象的ID
+     * @return 一条记录，如果查找不到则返回null
+     */
+    @Override
+    public Map<String, Object> mapSearchById(final ID id) {
+        return getThisSvc().mapSearchOne(Map.of("id", id));
     }
 
     /**
@@ -449,6 +500,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * 分页查询
      *
      * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
     @Override
@@ -460,10 +515,15 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * 分页查询
      *
      * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
     @Override
     public PageRa<?> mapSearch(Map<String, Object> paraMap) {
+        this.addTreeSearchParams(paraMap);
         long                        total  = mapSearcher.searchCount(getVoClass(), paraMap).longValue();
         @SuppressWarnings("unchecked")
         PageRa<Map<String, Object>> pageRa = (PageRa<Map<String, Object>>) correctPageParam(total, paraMap);
@@ -476,11 +536,17 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      *
      * @param clazz   查询与数据库映射的VO类
      * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
     @Override
     public <T> PageRa<T> search(Class<T> clazz, Map<String, Object> paraMap) {
+        this.addTreeSearchParams(paraMap);
         long      total  = beanSearcher.searchCount(clazz, paraMap).longValue();
+        @SuppressWarnings("unchecked")
         PageRa<T> pageRa = (PageRa<T>) correctPageParam(total, paraMap);
         pageRa.setList(beanSearcher.searchList(clazz, paraMap));
         return pageRa;
@@ -494,28 +560,15 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        if (paraMap == null) {
-            paraMap = new LinkedHashMap<>();
-        }
-
-        Object  page = paraMap.get(pageNumName);
-        Object  size = paraMap.get(pageSizeName);
-
-        Integer pageNum;
-        Integer pageSize;
-
-        if (page == null)
-            pageNum = pageStart;                                // 如果当前页的参数为空，那么设置为起始页
-        else
-            pageNum = Integer.valueOf(page.toString());         // 否则设置当前页
-
-        if (size == null)
-            pageSize = defaultPageSize;                         // 如果分页大小的参数为空，那么设置为默认分页大小
-        else
-            pageSize = Integer.valueOf(size.toString());        // 否则设置分页大小
+        // 获取分页大小参数
+        Object size     = paraMap.get(pageSizeName);
+        // 当前页
+        int    pageNum  = Integer.parseInt(paraMap.get(pageNumName).toString());
+        // 分页大小(如果参数为空，那么设置为默认分页大小)
+        int    pageSize = size == null ? defaultPageSize : Integer.parseInt(size.toString());
 
         // 如果传过来的分页大小大于最大分页大小，抛出异常
-        if (pageSize != null && pageSize > this.getMaxPageSize()) {
+        if (pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
         }
         // 如果当前页小于起始页，设置为起始页
@@ -524,7 +577,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
             paraMap.put(pageNumName, pageNum);
         }
         // 计算总页数
-        int pageCount = (int) Math.ceil((double) total / pageSize); // 总页数
+        int pageCount = (int) Math.ceil((double) total / pageSize);
         // 如果当前页数大于总页数，设置当前页数为最后一页(即总页数-起始页)
         if (pageNum > pageCount) {
             pageNum = pageCount - pageStart;
@@ -534,6 +587,53 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 .total(total)
                 .pageNum(pageNum)
                 .build();
+    }
+
+    /**
+     * 添加树形结构查询参数
+     * 
+     * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
+     */
+    private void addTreeSearchParams(Map<String, Object> paraMap) {
+        // 查询树形结构的层级
+        Object treeLevelObj = paraMap.get("treeLevel");
+        if (treeLevelObj == null) {
+            // 树形层级参数为空则不查询树形结构
+            return;
+        } else {
+            paraMap.remove("treeLevel");
+        }
+        // 树形层级
+        int    treeLevel     = Integer.parseInt(treeLevelObj.toString());
+        // 树形分层大小
+        int    treeLevelSize = this.getTreeLevelSize();
+
+        // 父节点ID
+        @SuppressWarnings("unchecked")
+        ID     parentId      = (ID) paraMap.get("parentId");
+        String likeTreeCode;
+        if (parentId == null) {
+            // 如何父ID为空且树形层级为0，意为查询所有，则不用添加查询条件
+            if (treeLevel == 0) {
+                return;
+            }
+            // 模糊查询的树编码
+            likeTreeCode = "_".repeat(treeLevel * treeLevelSize);
+        } else {
+            paraMap.remove("parentId");
+            Map<String, Object> parentNode = getThisSvc().mapSearchById(parentId);
+            String              treeCode   = parentNode.get(this.getTreeCodeFieldName()).toString();
+            // 模糊查询的树编码
+            likeTreeCode = treeCode + (treeLevel == 0 ? "%" : "_".repeat(treeLevel * treeLevelSize));
+        }
+        Map<String, Object> stringObjectMap = MapUtils.builder()
+                .field(this.getTreeCodeFieldName(), likeTreeCode).op(OrLike.class)
+                .build();
+        paraMap.putAll(stringObjectMap);
     }
 
 }
