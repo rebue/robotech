@@ -1,4 +1,4 @@
-package rebue.robotech.beansearch;
+package rebue.robotech.beansearcher.convertor;
 
 import cn.zhxu.bs.FieldConvertor;
 import cn.zhxu.bs.FieldMeta;
