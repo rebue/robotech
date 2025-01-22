@@ -702,7 +702,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 paraMap = MapUtils.builder()
                         .field(this.getTreeCodeFieldName(), treeCodesPage).op(InList.class)
                         .build();
-                List list = getSearchList(voClazz, paraMap, isBeanSearcher);
+                List list = getSearchAll(voClazz, paraMap, isBeanSearcher);
                 // noinspection unchecked
                 pageRa.setList(list);
                 return pageRa;
