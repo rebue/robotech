@@ -6,5 +6,7 @@ public interface Vo<ID> {
      *
      * @return ID
      */
-    ID getId();
+    default ID getId() {
+        throw new UnsupportedOperationException("This method is not yet implemented.");
+    }
 }
