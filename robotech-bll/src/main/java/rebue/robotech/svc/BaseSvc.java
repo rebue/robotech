@@ -53,7 +53,6 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param mo 添加的参数
      * @return 如果成功，且仅添加一条记录，返回添加后的实体，否则会抛出运行时异常
      */
-    @SuppressWarnings("unchecked")
     VO addMo(MO mo);
 
     /**
@@ -211,24 +210,46 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     Map<String, Object> mapSearchById(ID id);
 
     /**
-     * 查询列表
+     * 查询所有数据列表
      *
      * @param paraMap 检索参数
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
     List<VO> beanSearchList(Map<String, Object> paraMap);
 
     /**
-     * 适合需要分页的查询
+     * 查询所有数据列表(用于自定义查询的VO类)
+     *
+     * @param voClazz 查询与数据库映射的VO类
+     * @param paraMap 检索参数
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @return 数据列表
+     */
+    <T> List<T> beanSearchList0(Class<T> voClazz, Map<String, Object> paraMap);
+
+    /**
+     * 查询所有数据列表(用于自定义查询的VO类)
      *
      * @param paraMap 检索参数
-     *                page 为空则不分页
-     *                size 为空则使用默认分页大小
-     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
-     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
-     * @return { 总条数，数据列表 }
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @return 数据列表
      */
-    PageRa<VO> beanSearch(Map<String, Object> paraMap);
+    List<Map<String, Object>> mapSearchList(Map<String, Object> paraMap);
+
+    /**
+     * 查询所有数据列表(用于自定义查询的VO类)
+     *
+     * @param voClazz 查询与数据库映射的VO类
+     * @param paraMap 检索参数
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @return 数据列表
+     */
+    <T> List<T> searchList(Class<T> voClazz, Map<String, Object> paraMap);
 
     /**
      * 适合需要分页的查询
@@ -236,8 +257,33 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
-     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @return { 总条数，数据列表 }
+     */
+    PageRa<VO> beanSearch(Map<String, Object> paraMap);
+
+    /**
+     * 分页查询(用于自定义查询的VO类)
+     *
+     * @param voClazz 查询与数据库映射的VO类
+     * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @return { 总条数，数据列表 }
+     */
+    <T> PageRa<T> beanSearch0(Class<T> voClazz, Map<String, Object> paraMap);
+
+    /**
+     * 适合需要分页的查询
+     *
+     * @param paraMap 检索参数
+     *                page 为空则不分页
+     *                size 为空则使用默认分页大小
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
     PageRa<?> mapSearch(Map<String, Object> paraMap);
@@ -245,13 +291,13 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     /**
      * 分页查询(用于自定义查询的VO类)
      *
-     * @param clazz   查询与数据库映射的VO类
+     * @param voClazz 查询与数据库映射的VO类
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                treeLevel 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
-     *                parentId 父节点ID(为空则查询第一层节点，不为空则查询指定ID的子节点)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
-    <T> PageRa<T> search(Class<T> clazz, Map<String, Object> paraMap);
+    <T> PageRa<T> search(Class<T> voClazz, Map<String, Object> paraMap);
 }
