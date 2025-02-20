@@ -213,7 +213,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 查询所有数据列表
      *
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
@@ -224,7 +224,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @param voClazz 查询与数据库映射的VO类
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
@@ -234,8 +234,9 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * 查询所有数据列表(用于自定义查询的VO类)
      *
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     *                SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @return 数据列表
      */
     List<Map<String, Object>> mapSearchList(Map<String, Object> paraMap);
@@ -245,7 +246,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      *
      * @param voClazz 查询与数据库映射的VO类
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
@@ -257,7 +258,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
@@ -270,7 +271,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
@@ -282,7 +283,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
@@ -295,7 +296,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @param paraMap 检索参数
      *                page 为空则不分页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */

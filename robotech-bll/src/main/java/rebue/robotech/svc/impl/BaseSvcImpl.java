@@ -25,6 +25,7 @@ import cn.zhxu.bs.BeanSearcher;
 import cn.zhxu.bs.MapSearcher;
 import cn.zhxu.bs.operator.InList;
 import cn.zhxu.bs.operator.OrLike;
+import cn.zhxu.bs.util.MapBuilder;
 import cn.zhxu.bs.util.MapUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
@@ -65,8 +66,10 @@ import rebue.wheel.core.idworker.IdWorkerUtils;
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected CLONE_MAPPER   cloneMapper;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
     protected MAPPER         mybatisMapper;
     /**
@@ -488,7 +491,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * 查询所有数据列表
      *
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
@@ -502,7 +505,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      *
      * @param voClazz 查询与数据库映射的VO类
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return 数据列表
      */
@@ -515,8 +518,10 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     /**
      * 查询所有数据列表(用于自定义查询的VO类)
      * 
-     * @param paraMap 检索参数 SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推) SYS_PARENT_ID
-     *                父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     * @param paraMap 检索参数
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
+     *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     *                SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @return 数据列表
      */
     @Override
@@ -530,8 +535,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      *
      * @param voClazz 查询与数据库映射的VO类
      * @param paraMap 检索参数
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     *                SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @return 数据列表
      */
     @Override
@@ -545,8 +551,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      *
      * @param voClazz        查询与数据库映射的VO类
      * @param paraMap        检索参数
-     *                       SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                       SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                       SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
+     *                       SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @param isBeanSearcher 是否使用beanSearcher查询(true 使用beanSearcher查询，false 使用mapSearcher查询)
      * @return 数据列表
      */
@@ -560,10 +567,16 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 .orElse(null);
         // 树形结构查询
         if (treeLevel != null) {
-            // 获取符合条件的 treeCode 集合
-            Set<String> treeCodes = getTreeCodes(paraMap, treeLevel);
-            // treeCode 集合不为空，带自定义查询条件
-            if (treeCodes != null) {
+            // 是否带自定义查询条件
+            boolean customCondition    = false;
+            Object  customConditionObj = paraMap.remove(SysParamCst.CUSTOM_CONDITION);
+            if (customConditionObj != null) {
+                customCondition = Boolean.parseBoolean(customConditionObj.toString());
+            }
+            // 带自定义查询条件
+            if (customCondition) {
+                // 获取符合条件的 treeCode 集合
+                Set<String> treeCodes = listTreeCodes(paraMap, treeLevel);
                 // 更换查询参数为 treeCode 的集合
                 paraMap = MapUtils.builder()
                         .field(this.getTreeCodeFieldName(), treeCodes).op(InList.class)
@@ -571,7 +584,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 return getSearchAll(voClazz, paraMap, isBeanSearcher);
             }
 
-            // treeCode 集合为空，不带自定义查询条件
+            // else 不带自定义查询条件
             // 添加树形查询参数
             this.addTreeSearchParams(treeLevel, paraMap);
         }
@@ -585,7 +598,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param paraMap 检索参数
      *                page 为空则设置为起始页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
@@ -601,7 +614,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param paraMap 检索参数
      *                page 为空则设置为起始页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      *                SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @return { 总条数，数据列表 }
@@ -618,7 +631,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param paraMap 检索参数
      *                page 为空则设置为起始页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      * @return { 总条数，数据列表 }
      */
@@ -634,7 +647,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param paraMap 检索参数
      *                page 为空则设置为起始页
      *                size 为空则使用默认分页大小
-     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      *                SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @return { 总条数，数据列表 }
@@ -652,7 +665,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param paraMap        检索参数
      *                       page 为空则设置为起始页
      *                       size 为空则使用默认分页大小
-     *                       SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     *                       SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      *                       SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
      *                       SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      * @param isBeanSearcher 是否使用beanSearcher查询(true 使用beanSearcher查询，false 使用mapSearcher查询)
@@ -664,7 +677,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         }
         // 获取树形结构的层级
         Integer treeLevel = Optional.ofNullable(paraMap.remove(SysParamCst.TREE_LEVEL))
-                .map(o -> Integer.parseInt(o.toString()))
+                .map(item -> Integer.parseInt(item.toString()))
                 .orElse(null);
         // 总记录数
         long    total;
@@ -672,24 +685,52 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         if (treeLevel == null) {
             // noinspection unchecked
             total = beanSearcher.searchCount(voClazz, paraMap).longValue();
+            // 校正分页参数
+            PageRa<?> pageRa = correctPageParam(total, paraMap);
+            List      list;
+            if (total == 0) {
+                list = new LinkedList();
+            } else {
+                // 获取数据列表
+                list = getSearchList(voClazz, paraMap, isBeanSearcher);
+            }
+            // noinspection unchecked
+            pageRa.setList(list);
+            return pageRa;
         }
-        // 树形结构查询
-        else {
+
+        // else 树形结构查询
+        // 是否带自定义查询条件
+        boolean customCondition    = false;
+        Object  customConditionObj = paraMap.remove(SysParamCst.CUSTOM_CONDITION);
+        if (customConditionObj != null) {
+            customCondition = Boolean.parseBoolean(customConditionObj.toString());
+        }
+        // 带自定义查询条件
+        if (customCondition) {
             // 获取符合条件的 treeCode 集合
-            Set<String> treeCodes = getTreeCodes(paraMap, treeLevel);
-            // treeCode 集合不为空，带自定义查询条件
-            if (treeCodes != null) {
-                // 获取符合条件的第一层的 treeCode 集合
-                List<String> firstLevelTreeCodes = treeCodes.stream()
-                        .filter(treeCode -> treeCode.length() == this.getTreeLevelSize())
-                        .toList();
-                total = firstLevelTreeCodes.size();
-                // 校正分页参数
-                PageRa<?>    pageRa                  = correctPageParam(total, paraMap);
+            Set<String>  treeCodes           = listTreeCodes(paraMap, treeLevel);
+            // 获取符合条件的第一层的 treeCode 集合
+            List<String> firstLevelTreeCodes = treeCodes.stream()
+                    .filter(treeCode -> treeCode.length() == this.getTreeLevelSize())
+                    .toList();
+            total = firstLevelTreeCodes.size();
+            // 校正分页参数
+            PageRa<?> pageRa = correctPageParam(total, paraMap);
+            List      list;
+            if (total == 0) {
+                list = new LinkedList();
+            } else {
                 // 第几页
-                int          pageNum                 = pageRa.getPageNum() - pageStart;
+                int pageNum    = pageRa.getPageNum() - pageStart;
+                int pageSize   = pageRa.getPageSize();
+                int beginIndex = pageNum * pageSize;
+                int endIndex   = (pageNum + 1) * pageSize;
+                if (endIndex > total) {
+                    endIndex = (int) (total);
+                }
                 // 获取当前页记录的第一层 treeCode 集合
-                List<String> firstLevelTreeCodesPage = firstLevelTreeCodes.subList(pageNum - 1, pageNum);
+                List<String> firstLevelTreeCodesPage = firstLevelTreeCodes.subList(beginIndex, endIndex);
                 // 过滤符合的记录
                 List<String> treeCodesPage           = treeCodes.stream().filter(treeCode -> {
                                                          for (String firstLevelTreeCode : firstLevelTreeCodesPage) {
@@ -702,37 +743,38 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 paraMap = MapUtils.builder()
                         .field(this.getTreeCodeFieldName(), treeCodesPage).op(InList.class)
                         .build();
-                List list = getSearchAll(voClazz, paraMap, isBeanSearcher);
-                // noinspection unchecked
-                pageRa.setList(list);
-                return pageRa;
+                list    = getSearchAll(voClazz, paraMap, isBeanSearcher);
             }
-
-            // treeCode 集合为空，不带自定义查询条件，查询第一层的记录数为总记录数
-            Map<String, Object> treeMap = MapUtils.builder()
-                    .field(this.getTreeCodeFieldName(), "_".repeat(this.getTreeLevelSize())).op(OrLike.class)
-                    .putAll(paraMap)
-                    .build();
-            // 移除分页参数
-            treeMap.remove(pageNumName);
-            treeMap.remove(pageSizeName);
             // noinspection unchecked
-            total = beanSearcher.searchCount(voClazz, treeMap).longValue();
-            // 添加树形查询参数
-            this.addTreeSearchParams(treeLevel, paraMap);
+            pageRa.setList(list);
+            return pageRa;
         }
 
-        // 校正分页参数
-        PageRa<?> pageRa = correctPageParam(total, paraMap);
-        // 获取数据列表
-        List      list   = getSearchList(voClazz, paraMap, isBeanSearcher);
+        // else 不带自定义查询条件，查询第一层的记录数为总记录数
+        // 添加树形查询参数
+        this.addTreeSearchParams(1, paraMap);
+        PageRa<?>    pageRa        = mapSearch(paraMap);
+        List<String> treeCodesPage = pageRa.getList().stream()
+                .map(item -> ((Map) item).get(this.getTreeCodeFieldName()).toString()).toList();
+        // 更换查询参数为 treeCode 的集合
+        MapBuilder   builder       = MapUtils.builder();
+        builder.or(o -> {
+            for (String treeCode : treeCodesPage) {
+                o.field(this.getTreeCodeFieldName(), treeCode);
+                o.field(this.getTreeCodeFieldName(), treeCode + "_".repeat(this.getTreeLevelSize())).op(OrLike.class);
+            }
+        });
+        paraMap = builder.build();
+        List list = getSearchAll(voClazz, paraMap, isBeanSearcher);
         // noinspection unchecked
         pageRa.setList(list);
         return pageRa;
     }
 
     /**
-     * 获取所有数据列表(统一了 mapSearcher 和 beanSearcher 的查询)
+     * 获取所有数据列表
+     * 统一了 mapSearcher 和 beanSearcher 的查询
+     * 忽略分页参数
      *
      * @param voClazz        查询与数据库映射的VO类
      * @param paraMap        检索参数
@@ -765,46 +807,54 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 校正后的分页信息
      */
     private PageRa<?> correctPageParam(long total, Map<String, Object> paraMap) {
-        // 当前页
-        Object page     = paraMap.get(pageNumName);
         // 获取分页大小参数
-        Object size     = paraMap.get(pageSizeName);
-        // 当前页
-        int    pageNum  = page == null ? pageStart : Integer.parseInt(page.toString());
+        Object size     = paraMap.remove(pageSizeName);
         // 分页大小(如果参数为空，那么设置为默认分页大小)
         int    pageSize = size == null ? defaultPageSize : Integer.parseInt(size.toString());
-
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
         }
-        // 如果当前页小于起始页，设置为起始页
-        if (pageNum < pageStart) {
-            pageNum = pageStart;
-            paraMap.put(pageNumName, pageNum);
-        }
+
         // 计算总页数
-        int pageCount = (int) Math.ceil((double) total / pageSize);
-        // 如果当前页数大于总页数，设置当前页数为最后一页(即总页数-起始页)
-        if (pageNum > pageCount) {
-            pageNum = pageCount - pageStart;
-            paraMap.put(pageNumName, pageNum);
+        int pageCount = total == 0 ? 0 : (int) Math.ceil((double) total / pageSize);
+
+        // 获取当前页号参数
+        int pageNum;
+        // 总数为0，当前页为1
+        if (total == 0) {
+            pageNum = 1;
+        } else {
+            Object page = paraMap.remove(pageNumName);
+            // 当前页号(如果参数为空，那么设置为默认起始页号)
+            pageNum = page == null ? pageStart : Integer.parseInt(page.toString());
+
+            // 如果当前页号小于起始页号，设置为起始页号
+            if (pageNum < pageStart) {
+                pageNum = pageStart;
+            }
+            // 如果当前页号大于总页数，设置当前页数为最后一页(即总页数-起始页)
+            else if (pageNum > pageCount) {
+                pageNum = pageCount + 1 - pageStart;
+            }
         }
+
+        // 纠正后回填参数
+        paraMap.put(pageSizeName, pageSize);
+        paraMap.put(pageNumName, pageNum);
         return PageRa.builder()
                 .total(total)
                 .pageNum(pageNum)
+                .pageSize(pageSize)
                 .build();
     }
 
     /**
      * 添加树形结构查询参数
      * 
-     * @param treeLevel 查询树形结构的层级(0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     * @param treeLevel 查询树形结构的层级(0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      * @param paraMap   检索参数
-     *                  page 为空则不分页
-     *                  size 为空则使用默认分页大小
      *                  SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
-     *                  SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
      */
     private void addTreeSearchParams(int treeLevel, Map<String, Object> paraMap) {
         // 父节点ID
@@ -833,7 +883,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     /**
      * 添加树形编码模糊查询的参数
      *
-     * @param treeLevel      查询树形结构的层级(不能为空，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
+     * @param treeLevel      查询树形结构的层级(不能为空，0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
      * @param parentTreeCode 父节点的树形编码(为空则从第一层节点开始查询)
      * @return 查询字符串列表
      */
@@ -846,42 +896,27 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     }
 
     /**
-     * 获取符合条件的 treeCode 集合，如果不带自定义查询条件，则返回 null
+     * 获取符合条件的 treeCode 集合(包括符合条件节点的父节点)
      *
      * @param paraMap   检索参数
-     *                  page 为空则设置为起始页
-     *                  size 为空则使用默认分页大小
-     *                  SYS_TREE_LEVEL 查询树形结构的层级(为空则不查询树形结构，0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
-     *                  SYS_PARENT_ID 父节点ID(为空则从第一层节点开始查询，不为空则查询指定ID的子节点)
-     *                  SYS_CUSTOM_CONDITION 是否自定义查询条件(为空或false 不自定义查询条件，为true 才自定义查询条件)
-     * @param treeLevel 查询树形结构的层级(0-表示查询所有层，1-表示查询第1层，2-表示查询第2层，以此类推)
-     * @return 符合条件的 treeCode 集合
+     * @param treeLevel 查询树形结构的层级(0-表示查询所有层，1-表示查询1层，2-表示查询2层，以此类推)
+     * @return 符合条件的 treeCode 集合(包括符合条件节点的父节点)
      */
-    private Set<String> getTreeCodes(Map<String, Object> paraMap, Integer treeLevel) {
-        // 是否带自定义查询条件
-        boolean customCondition    = false;
-        Object  customConditionObj = paraMap.remove(SysParamCst.CUSTOM_CONDITION);
-        if (customConditionObj != null) {
-            customCondition = Boolean.parseBoolean(customConditionObj.toString());
-        }
-
-        if (!customCondition) {
-            return null;
-        }
-
+    private Set<String> listTreeCodes(Map<String, Object> paraMap, Integer treeLevel) {
         // 添加树形查询参数
         this.addTreeSearchParams(treeLevel, paraMap);
         // 查询符合条件的记录
-        List<Map<String, Object>> voMaps    = getThisSvc().mapSearchList(paraMap);
+        // List<Map<String, Object>> voMaps = getThisSvc().mapSearchList(paraMap);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> voMaps    = (List<Map<String, Object>>) getSearchList(getVoClass(), paraMap, false);
         // 遍历符合条件的记录，生成查询 treeCode 的集合
         Set<String>               treeCodes = new LinkedHashSet<>();
         for (Map<String, Object> voMap : voMaps) {
-            String curTreeCode       = voMap.get(this.getTreeCodeFieldName()).toString();
-            int    curTreeCodeLength = curTreeCode.length();
-            int    curTreeCodeLevel  = curTreeCodeLength / this.getTreeLevelSize();
-            for (int i = 1; i < curTreeCodeLevel; i++) {
-                curTreeCode = curTreeCode.substring(0, i * this.getTreeLevelSize());
-                treeCodes.add(curTreeCode);
+            final String curTreeCode       = voMap.get(this.getTreeCodeFieldName()).toString();
+            int          curTreeCodeLength = curTreeCode.length();
+            int          curTreeCodeLevel  = curTreeCodeLength / this.getTreeLevelSize();
+            for (int i = 1; i <= curTreeCodeLevel; i++) {
+                treeCodes.add(curTreeCode.substring(0, i * this.getTreeLevelSize()));
             }
         }
         return treeCodes;
