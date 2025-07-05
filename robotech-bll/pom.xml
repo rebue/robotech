@@ -77,6 +77,11 @@
             <groupId>cn.zhxu</groupId>
             <artifactId>bean-searcher-boot-starter</artifactId>
         </dependency>
+        <!-- bean search过滤器所需插件，简化前端传参 -->
+        <dependency>
+            <groupId>cn.zhxu</groupId>
+            <artifactId>xjsonkit-jackson</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.data</groupId>
