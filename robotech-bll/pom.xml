@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.rebue.robotech</groupId>
         <artifactId>robotech</artifactId>
-        <version>3.6.53</version>
+        <version>3.7.54</version>
     </parent>
 
     <artifactId>robotech-bll</artifactId>
@@ -31,10 +31,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
         </dependency>
 
         <dependency>
