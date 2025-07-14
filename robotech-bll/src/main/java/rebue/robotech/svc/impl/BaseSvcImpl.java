@@ -107,6 +107,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     private Integer          pageStart;
 
     /**
+     * 默认批量导入缓冲大小(不设置为100)
+     */
+    @Value("${rebue.import.default-batch-size:100}")
+    protected Integer        defaultImportBatchSize;
+
+    /**
      * 配置idworker参数
      * "auto": 由zookeeper自动分配nodeId(nodeIdBits默认为5)
      * "auto:xx": 由zookeeper自动分配nodeId("xx"为nodeIdBits的值)
