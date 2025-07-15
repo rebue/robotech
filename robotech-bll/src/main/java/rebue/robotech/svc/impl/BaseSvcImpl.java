@@ -190,6 +190,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 如果成功，且仅添加一条记录，返回添加时自动生成的ID，否则会抛出运行时异常
      */
     @Override
+    @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO add(final ADD_TO to) {
         final MO mo = cloneMapper.addToMapMo(to);
@@ -233,6 +234,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 如果成功，且仅修改一条记录，正常返回，否则会抛出运行时异常
      */
     @Override
+    @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO modifyById(final MODIFY_TO to) {
         final MO mo = cloneMapper.modifyToMapMo(to);
@@ -263,6 +265,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     }
 
     @Override
+    @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO save(final MO mo) {
         if (mo.getId() != null) {
@@ -284,6 +287,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @param id 要删除记录的ID
      */
     @Override
+    @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void delById(final ID id) {
         final int rowCount = mybatisMapper.deleteByPrimaryKey(id);
@@ -302,6 +306,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 返回删除的记录数
      */
     @Override
+    @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Integer delSelective(final DEL_TO to) {
         try {
