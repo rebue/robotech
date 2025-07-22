@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.rebue.robotech</groupId>
         <artifactId>robotech</artifactId>
-        <version>3.7.56</version>
+        <version>3.7.57</version>
     </parent>
 
     <artifactId>robotech-bll</artifactId>
@@ -67,6 +67,10 @@
         <dependency>
             <groupId>org.mybatis.dynamic-sql</groupId>
             <artifactId>mybatis-dynamic-sql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
         </dependency>
 
         <dependency>

@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.dynamic.sql.exception.NonRenderingWhereClauseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import rebue.robotech.beansearcher.cst.SysParamCst;
 import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.mybatis.MapperRootInterface;
+import rebue.robotech.mybatis.MyBatisUtils;
 import rebue.robotech.svc.BaseSvc;
 import rebue.robotech.to.ModifyTo;
 import rebue.robotech.to.PageTo;
@@ -66,51 +68,54 @@ import rebue.wheel.core.idworker.IdWorkerUtils;
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
         implements BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
 
+    @Autowired
+    private SqlSessionFactory sqlSessionFactory;
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected CLONE_MAPPER   cloneMapper;
+    protected CLONE_MAPPER    cloneMapper;
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired // 这里不能用@Resource，否则启动会报 `required a single bean, but xxx were found` 的错误
-    protected MAPPER         mybatisMapper;
+    protected MAPPER          mybatisMapper;
     /**
      * 注入 Map 检索器，它检索出来的数据以 Map 对象呈现
      */
     @Autowired
-    protected MapSearcher    mapSearcher;
+    protected MapSearcher     mapSearcher;
     /**
      * 注入 Bean 检索器，它检索出来的数据以 泛型 对象呈现
      */
     @Autowired
-    protected BeanSearcher   beanSearcher;
+    protected BeanSearcher    beanSearcher;
     @Autowired(required = false)
-    private CuratorFramework _zkClient;
+    private CuratorFramework  _zkClient;
 
     /**
      * 默认分页大小
      */
     @Value("${rebue.page.default-page-size:10}")
-    private Integer          defaultPageSize;
+    private Integer           defaultPageSize;
     /**
      * beanSearcher当前页的名称
      */
     @Value("${bean-searcher.params.pagination.page:page}")
-    private String           pageNumName;
+    private String            pageNumName;
     /**
      * beanSearcher分页的大小
      */
     @Value("${bean-searcher.params.pagination.size:size}")
-    private String           pageSizeName;
+    private String            pageSizeName;
     /**
      * beanSearcher起始页
      */
     @Value("${bean-searcher.params.pagination.start:0}")
-    private Integer          pageStart;
+    private Integer           pageStart;
 
     /**
      * 默认批量导入缓冲大小(不设置为100)
      */
     @Value("${rebue.import.default-batch-size:100}")
-    protected Integer        defaultImportBatchSize;
+    protected Integer         defaultImportBatchSize;
 
     /**
      * 配置idworker参数
@@ -120,12 +125,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * 不设置: 不使用zookeeper来计算id(仅用于开发或单机模式中)
      */
     @Value("${rebue.idworker}")
-    private String           idworker;
+    private String            idworker;
 
     /**
      * ID生成器
      */
-    protected IdWorker3      _idWorker;
+    protected IdWorker3       _idWorker;
 
     @PostConstruct
     public void init() throws Exception {
@@ -220,7 +225,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         mo.setCreateTimestamp(now);
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.insertSelective(mo);
-        if (rowCount != 1) {
+        if (!MyBatisUtils.isBatchExecutor(sqlSessionFactory) && rowCount != 1) {
             throw new RuntimeExceptionX("添加记录异常，影响行数为" + rowCount);
         }
         // XXX 通过调用getById，如果有缓存机制，可将新添加的记录存入缓存中
@@ -254,11 +259,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         final Long now = System.currentTimeMillis();
         mo.setUpdateTimestamp(now);
         final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
-        if (rowCount == 0) {
-            throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
-        }
-        if (rowCount != 1) {
-            throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
+        if (!MyBatisUtils.isBatchExecutor(sqlSessionFactory)) {
+            if (rowCount == 0) {
+                throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
+            }
+            if (rowCount != 1) {
+                throw new RuntimeExceptionX("修改记录异常，影响行数为" + rowCount);
+            }
         }
         // XXX 注意这里是this，而不是getThisSvc()，这是避免使用到了缓存
         return this.getById(mo.getId());
@@ -291,11 +298,13 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void delById(final ID id) {
         final int rowCount = mybatisMapper.deleteByPrimaryKey(id);
-        if (rowCount == 0) {
-            throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
-        }
-        if (rowCount != 1) {
-            throw new RuntimeExceptionX("删除记录异常，影响行数为" + rowCount);
+        if (!MyBatisUtils.isBatchExecutor(sqlSessionFactory)) {
+            if (rowCount == 0) {
+                throw new RuntimeExceptionX("删除记录异常，记录已不存在或有变动");
+            }
+            if (rowCount != 1) {
+                throw new RuntimeExceptionX("删除记录异常，影响行数为" + rowCount);
+            }
         }
     }
 
