@@ -30,7 +30,6 @@ import cn.zhxu.bs.util.MapBuilder;
 import cn.zhxu.bs.util.MapUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
-import lombok.extern.slf4j.Slf4j;
 import rebue.robotech.beansearcher.cst.SysParamCst;
 import rebue.robotech.clone.CloneMapper;
 import rebue.robotech.mo.Mo;
@@ -62,7 +61,6 @@ import rebue.wheel.core.idworker.IdWorkerUtils;
  * 4. 如果要调用自己的方法，应该使用getThisSvc()代替this来调用，这样该方法的事务才会起效
  * </pre>
  */
-@Slf4j
 @RefreshScope
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DEL_TO, ONE_TO, LIST_TO, PAGE_TO extends PageTo, MO extends Mo<ID>, VO extends Vo<ID>, MAPPER extends MapperRootInterface<MO, ID>, CLONE_MAPPER extends CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO>>
@@ -138,8 +136,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
     }
 
     @EventListener
-    public void eventListener(EnvironmentChangeEvent event) {
-        log.info("config change: {}", event.getKeys());
+    public void eventListener(@SuppressWarnings("unused") EnvironmentChangeEvent event) {
         createIdWorker();
     }
 
