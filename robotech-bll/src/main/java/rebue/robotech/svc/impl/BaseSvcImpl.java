@@ -108,6 +108,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      */
     @Value("${bean-searcher.params.pagination.start:0}")
     private Integer            pageStart;
+    /**
+     * 分页保护：最大允许偏移量，最大允许页码是 maxAllowedOffset / pageSize
+     */
+    @Value("${bean-searcher.params.pagination.max-allowed-offset:20000}")
+    private Long               maxAllowedOffset;
 
     /**
      * 默认批量导入缓冲大小(不设置为100)
@@ -705,7 +710,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
             // 校正分页参数
             PageRa<?> pageRa = correctPageParam(total, paraMap);
             List      list;
-            if (total == 0) {
+            if (pageRa.getTotal() == 0) {
                 list = new LinkedList();
             } else {
                 // 获取数据列表
@@ -735,7 +740,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
             // 校正分页参数
             PageRa<?> pageRa = correctPageParam(total, paraMap);
             List      list;
-            if (total == 0) {
+            if (pageRa.getTotal() == 0) {
                 list = new LinkedList();
             } else {
                 // 第几页
@@ -743,8 +748,8 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
                 int pageSize   = pageRa.getPageSize();
                 int beginIndex = pageNum * pageSize;
                 int endIndex   = (pageNum + 1) * pageSize;
-                if (endIndex > total) {
-                    endIndex = (int) (total);
+                if (endIndex > pageRa.getTotal()) {
+                    endIndex = pageRa.getTotal().intValue();
                 }
                 // 获取当前页记录的第一层 treeCode 集合
                 List<String> firstLevelTreeCodesPage = firstLevelTreeCodes.subList(beginIndex, endIndex);
@@ -831,6 +836,11 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         // 如果传过来的分页大小大于最大分页大小，抛出异常
         if (pageSize > this.getMaxPageSize()) {
             throw new IllegalArgumentException(pageSizeName + "不能大于" + this.getMaxPageSize());
+        }
+
+        // 总数不能大于允许的偏移量
+        if (total > maxAllowedOffset) {
+            total = maxAllowedOffset;
         }
 
         // 计算总页数
