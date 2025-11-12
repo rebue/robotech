@@ -18,9 +18,23 @@ public interface Mo<ID> {
     void setId(ID id);
 
     /**
+     * 获取创建时间戳
+     */
+    default Long getCreateTimestamp() {
+        return null;
+    }
+
+    /**
      * 设置创建时间戳
      */
     default void setCreateTimestamp(final Long createTimestamp) {
+    }
+
+    /**
+     * 获取修改时间戳
+     */
+    default Long getUpdateTimestamp() {
+        return null;
     }
 
     /**
