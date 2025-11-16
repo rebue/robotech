@@ -3,7 +3,6 @@ package rebue.robotech.clone;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.TargetType;
-
 import rebue.wheel.api.dic.Dic;
 import rebue.wheel.api.dic.DicUtils;
 
@@ -13,19 +12,19 @@ import rebue.wheel.api.dic.DicUtils;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public class EnumConverter {
     /**
-     * 字典项映射Byte
+     * 字典项映射Short
      *
      * @param dicItem 字典项
-     * @return Byte
+     * @return Short
      */
-    public <E extends Dic> Byte dicItemMapByte(E dicItem) {
+    public <E extends Dic> Short dicItemMapShort(E dicItem) {
         if (dicItem == null)
             return null;
-        return dicItem.getCode().byteValue();
+        return dicItem.getCode().shortValue();
     }
 
     /**
-     * Byte映射字典项
+     * Short映射字典项
      *
      * @param code  字典项编码
      * @param clazz 字典类引用
@@ -33,7 +32,7 @@ public class EnumConverter {
      * @return 字典项
      */
     @SuppressWarnings("unchecked")
-    public <E extends Dic> E byteMapDicItem(Byte code, @TargetType Class<E> clazz) {
+    public <E extends Dic> E shortMapDicItem(Short code, @TargetType Class<E> clazz) {
         return (E) DicUtils.getItem(clazz, Integer.valueOf(code));
     }
 

@@ -9,9 +9,11 @@ import rebue.wheel.api.ra.PageRa;
 public interface CloneMapper<ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO, MO, VO> {
     PageRa<VO> pageInfoMapPageRa(@SuppressWarnings("rawtypes") PageInfo pageInfo);
 
-    VO moMapVo(MO to);
+    VO moMapVo(MO mo);
 
-    List<VO> moListMapVoList(List<MO> to);
+    MO voMapMo(VO vo);
+
+    List<VO> moListMapVoList(List<MO> mo);
 
     MO addToMapMo(ADD_TO to);
 

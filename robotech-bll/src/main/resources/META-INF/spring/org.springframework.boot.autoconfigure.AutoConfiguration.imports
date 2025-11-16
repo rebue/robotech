@@ -1,4 +1,3 @@
 rebue.robotech.config.IdWorkerConfig
 rebue.robotech.beansearcher.BeanSearcherConfig
-rebue.robotech.clone.EnumConverter
-rebue.robotech.clone.PostGisConverter
+rebue.robotech.clone.CloneConfig
