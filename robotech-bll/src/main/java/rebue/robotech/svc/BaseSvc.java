@@ -3,6 +3,8 @@ package rebue.robotech.svc;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.github.pagehelper.ISelect;
@@ -72,6 +74,15 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
     VO modifyMoById(MO mo);
 
     /**
+     * 通过ID修改记录内容(修改为空的参数)
+     *
+     * @param mo 修改的参数，必须包含ID
+     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    VO modifyMoByIdWithNull(MO mo);
+
+    /**
      * 保存
      * 先添加，如果添加抛出DuplicateKeyException异常，就改为修改
      *
@@ -79,6 +90,10 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
      * @return 添加或修改后的内容
      */
     VO save(MO mo);
+
+    @SuppressWarnings("DefaultAnnotationParam")
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    void setEnabled(MO mo, ID id, boolean isEnabled);
 
     /**
      * 通过ID删除记录

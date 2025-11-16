@@ -18,6 +18,14 @@ public interface Mo<ID> {
     void setId(ID id);
 
     /**
+     * 获取是否启用
+     */
+    default void setIsEnabled(Boolean isEnabled) {
+    }
+
+    ;
+
+    /**
      * 获取创建时间戳
      */
     default Long getCreateTimestamp() {

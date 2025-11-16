@@ -260,14 +260,38 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VO modifyMoById(final MO mo) {
+        return this.modifyMo(mo, false);
+    }
+
+    /**
+     * 通过ID修改记录内容(修改为空的参数)
+     *
+     * @param mo 修改的参数，必须包含ID
+     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Override
+    public VO modifyMoByIdWithNull(final MO mo) {
+        return this.modifyMo(mo, true);
+    }
+
+    /**
+     * 修改记录内容
+     *
+     * @param mo           修改的参数
+     * @param isModifyNull 是否修改为空的参数
+     * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
+     */
+    private VO modifyMo(final MO mo, final boolean isModifyNull) {
         // 如果没有更新时间
-        if (mo.getCreateTimestamp() == null) {
+        if (mo.getUpdateTimestamp() == null) {
             final Long now = System.currentTimeMillis();
             mo.setUpdateTimestamp(now);
         }
 
-        final int rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
+        final int rowCount = isModifyNull ? mybatisMapper.updateByPrimaryKey(mo) : mybatisMapper.updateByPrimaryKeySelective(mo);
         if (!MyBatisUtils.isBatchExecutor(sqlSessionTemplate)) {
             if (rowCount == 0) {
                 throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
@@ -278,6 +302,7 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         }
         // XXX 注意这里是this，而不是getThisSvc()，这是避免使用到了缓存
         return this.getById(mo.getId());
+
     }
 
     @Override
@@ -294,6 +319,22 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
         }
         // 如果不存在，则添加
         return this.addMo(mo);
+    }
+
+    /**
+     * 通过ID设置记录的启用状态
+     *
+     * @param mo        设置启用状态的参数
+     * @param id        要设置启用状态的记录的ID
+     * @param isEnabled 要设置的启用状态
+     */
+    @SuppressWarnings("DefaultAnnotationParam")
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Override
+    public void setEnabled(MO mo, final ID id, final boolean isEnabled) {
+        mo.setId(id);
+        mo.setIsEnabled(isEnabled);
+        this.modifyMoByIdWithNull(mo);
     }
 
     /**
