@@ -23,7 +23,19 @@ public interface Mo<ID> {
     default void setIsEnabled(Boolean isEnabled) {
     }
 
-    ;
+
+    /**
+     * 获取创建者ID
+     */
+    default Long getCreatorId() {
+        return null;
+    }
+
+    /**
+     * 设置修改者ID
+     */
+    default void setUpdatorId(final Long updatorId) {
+    }
 
     /**
      * 获取创建时间戳

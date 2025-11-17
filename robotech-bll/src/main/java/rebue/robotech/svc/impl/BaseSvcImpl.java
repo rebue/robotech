@@ -217,8 +217,12 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
             }
         }
 
+        // 设置修改者ID就是创建者ID
+        mo.setUpdatorId(mo.getCreatorId());
+
         // 如果有创建时间
         if (mo.getCreateTimestamp() != null) {
+            // 设置修改时间就是创建时间
             mo.setUpdateTimestamp(mo.getCreateTimestamp());
         }
         // 如果没有创建时间
