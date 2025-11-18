@@ -1,20 +1,18 @@
 package rebue.robotech.svc;
 
-import java.util.List;
-import java.util.Map;
-
+import com.github.pagehelper.ISelect;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.github.pagehelper.ISelect;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import rebue.robotech.mo.Mo;
 import rebue.robotech.to.PageTo;
 import rebue.robotech.vo.Vo;
 import rebue.wheel.api.ra.PageRa;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 基础服务层接口
@@ -93,6 +91,7 @@ public interface BaseSvc<ID, ADD_TO, MODIFY_TO, DEL_TO, ONE_TO, LIST_TO, PAGE_TO
 
     @SuppressWarnings("DefaultAnnotationParam")
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Deprecated
     void setEnabled(MO mo, ID id, boolean isEnabled);
 
     /**
