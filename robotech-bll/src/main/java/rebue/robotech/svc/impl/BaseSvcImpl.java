@@ -289,16 +289,23 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     private VO modifyMo(final MO mo, final boolean isModifyNull) {
-        // 修改时设置创建者ID为空，以防误传入进来
-        mo.setCreatorId(null);
-
         // 如果没有更新时间
         if (mo.getUpdateTimestamp() == null) {
             final Long now = System.currentTimeMillis();
             mo.setUpdateTimestamp(now);
         }
 
-        final int rowCount = isModifyNull ? mybatisMapper.updateByPrimaryKey(mo) : mybatisMapper.updateByPrimaryKeySelective(mo);
+        final int rowCount;
+        if (isModifyNull) {
+            rowCount = mybatisMapper.updateByPrimaryKey(mo);
+        } else {
+            // 修改时设置创建者ID和创建时间为空，以防误传入进来
+            mo.setCreatorId(null);
+            mo.setCreateTimestamp(null);
+
+            rowCount = mybatisMapper.updateByPrimaryKeySelective(mo);
+        }
+
         if (!MyBatisUtils.isBatchExecutor(sqlSessionTemplate)) {
             if (rowCount == 0) {
                 throw new NoSuchElementException("修改记录异常，记录不存在或已被删除");
