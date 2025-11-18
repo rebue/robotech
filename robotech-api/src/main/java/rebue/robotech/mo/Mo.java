@@ -32,6 +32,12 @@ public interface Mo<ID> {
     }
 
     /**
+     * 获取创建者ID
+     */
+    default void setCreatorId(final Long creatorId) {
+    }
+
+    /**
      * 设置修改者ID
      */
     default void setUpdatorId(final Long updatorId) {

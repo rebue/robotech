@@ -289,6 +289,9 @@ public abstract class BaseSvcImpl<ID, ADD_TO, MODIFY_TO extends ModifyTo<ID>, DE
      * @return 如果成功，且仅修改一条记录，正常返回修改后的实体，否则会抛出运行时异常
      */
     private VO modifyMo(final MO mo, final boolean isModifyNull) {
+        // 修改时设置创建者ID为空，以防误传入进来
+        mo.setCreatorId(null);
+
         // 如果没有更新时间
         if (mo.getUpdateTimestamp() == null) {
             final Long now = System.currentTimeMillis();
